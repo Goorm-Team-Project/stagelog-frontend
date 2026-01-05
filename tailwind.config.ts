@@ -8,7 +8,7 @@ const config: Config = {
   theme: {
     extend: {
       maxWidth: {
-        layout: '1440px', 
+        layout: '1280px', 
       },
     },
   },
