@@ -11,7 +11,7 @@ const config: Config = {
         sans: ['Pretendard', 'ui-sans-serif', 'system-ui'],
       },
       maxWidth: {
-        layout: '1440px', 
+        layout: '1280px', 
       },
     },
   },
