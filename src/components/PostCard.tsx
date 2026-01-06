@@ -3,7 +3,7 @@ import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 // 시계 아이콘
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
-type PostListItemProps = {
+type PostCardProps = {
     authorName: string;
     createdAtLabel: string;
     title: string;
@@ -12,10 +12,11 @@ type PostListItemProps = {
     commentCount: number;
     userBadgeName?: string;
     categoryLabel?: string;
+    concertName?: string;
     onClick?: () => void;
 };
 
-export default function PostListItem({
+export default function PostCard({
     authorName,
     createdAtLabel,
     title,
@@ -24,14 +25,20 @@ export default function PostListItem({
     commentCount,
     userBadgeName,
     categoryLabel = "후기",
+    concertName,
     onClick,
-}: PostListItemProps) {
+}: PostCardProps) {
     return (
         <button
             type="button"
             onClick={onClick}
             className="w-full text-left border border-gray-100 rounded-xl px-8 py-6 overflow-hidden bg-white shadow-md hover:shadow-lg transition"
         >
+            {/*행사 정보 */}
+            {concertName && (
+                <div className="text-xl text-black mb-2 pb-1 border-b border-gray-100">{`${concertName}`}</div>
+            )}
+
             {/* 상단 메타 */}
             <div className="flex items-center gap-1">
                 <span className="font-semibold text-gray-900">{authorName}</span>
@@ -42,21 +49,20 @@ export default function PostListItem({
                     </span>
                 )}
 
-                {categoryLabel && (
-                    <span className="ml-3 rounded-full bg-pink-100 px-2.5 py-1 text-[11px] font-semibold text-pink-600">
-                        {categoryLabel}
-                    </span>
-                )}
-
-                <span className="ml-1 text-gray-500">
+                <span className="ml-2 text-gray-500">
                     <AccessTimeIcon sx={{ fontSize: 18 }} />
                 </span>
                 <span className="text-sm text-gray-500">{createdAtLabel}</span>
             </div>
 
             {/* 제목 */}
-            <div className="mt-2 line-clamp-1 text-[18px] font-semibold text-gray-900">
+            <div className="flex items-center gap-2 mt-2 line-clamp-1 text-[18px] font-semibold text-gray-900">
                 {title}
+                {categoryLabel && (
+                    <span className="rounded-full bg-pink-100 px-2.5 py-1 text-[12px] font-semibold text-pink-600">
+                        {categoryLabel}
+                    </span>
+                )}
             </div>
 
             {/* 본문 요약 */}
