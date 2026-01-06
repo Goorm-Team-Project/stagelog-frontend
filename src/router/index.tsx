@@ -8,6 +8,7 @@ import LoginPage from '@/pages/LoginPage'
 import RegisterPage from '@/pages/RegisterPage'
 import SearchPage from '@/pages/SearchPage'
 import ConcertPage from '@/pages/ConcertPage'
+import CommunityPage from '@/pages/CommunityPage'
 
 
 
@@ -23,6 +24,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '/search', element: <SearchPage /> },
       { path: '/concerts', element: <ConcertPage /> },
+      { path: '/community', element: <CommunityPage /> },
     ]
   },
   {
