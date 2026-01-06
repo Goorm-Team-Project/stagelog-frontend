@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 import SearchIcon from '@mui/icons-material/Search'
@@ -22,6 +23,13 @@ const searchFieldSx = {
 }
 
 export default function Header() {
+  const navigate = useNavigate()
+  const [keyword, setKeyword] = useState('')
+
+  const handleSearch = () => {
+    if (!keyword.trim()) return
+    navigate(`/search?q=${encodeURIComponent(keyword.trim())}`)
+  }
   return (
     <header className="bg-white">
       <div className="mx-auto max-w-layout px-6 h-20 flex items-center justify-between">
@@ -43,11 +51,18 @@ export default function Header() {
             size="small"
             placeholder="검색"
             variant="outlined"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSearch()
+              }
+            }}
             slotProps={{
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon sx={{ color: '#9CA3AF' }} />
+                    <SearchIcon sx={{ color: '#9CA3AF', cursor: 'pointer' }} />
                   </InputAdornment>
                 ),
               },
