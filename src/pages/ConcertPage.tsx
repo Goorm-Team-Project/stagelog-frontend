@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import ConcertCard from '@/components/ConcertCard'
 import SearchIcon from '@mui/icons-material/Search'
@@ -7,6 +7,10 @@ import Pagination from '@mui/material/Pagination'
 import PaginationItem from '@mui/material/PaginationItem'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import SortIcon from '@mui/icons-material/Sort';
+import CheckIcon from '@mui/icons-material/Check'
 
 const PAGE_SIZE = 12
 const concerts = [ // 콘서트 데이터 예시
@@ -141,6 +145,13 @@ const concerts = [ // 콘서트 데이터 예시
     },
 ]
 
+type SortType = 'latest' | 'likes' | 'bookmarks'
+const SORT_LABEL: Record<SortType, string> = {
+    latest: '최신 순',
+    likes: '인기 순',
+    bookmarks: '즐겨찾기 순',
+}
+
 export default function ConcertPage() {
     const [searchParams, setSearchParams] = useSearchParams()
     const query = searchParams.get('q') ?? ''
@@ -148,6 +159,32 @@ export default function ConcertPage() {
     const page = Number(searchParams.get('page') ?? 1)
     const totalCount = 36 // 예시: 총 공연 정보 개수 (나중에 API에서 받아올 예정)
     const pageCount = Math.ceil(totalCount / PAGE_SIZE)
+
+    /** 정렬 */
+    const sort = (searchParams.get('sort') as SortType) ?? 'latest'
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+    const open = Boolean(anchorEl)
+
+    const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget)
+    }
+
+    const handleClose = () => {
+        setAnchorEl(null)
+    }
+
+    const handleSortChange = (value: SortType) => {
+        setSearchParams({
+            q: query,
+            page: '1',
+            sort: value,
+        })
+        handleClose()
+    }
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }, [page])
 
     return (
         <main className="mx-auto max-w-layout px-4 py-6 space-y-10">
@@ -184,8 +221,49 @@ export default function ConcertPage() {
                     </h2>
 
                 </div>
+
+                {/* 정렬 버튼 */}
+                <button
+                    onClick={handleOpen}
+                    className="flex items-center gap-1 px-3 py-1 text-md border rounded-md text-gray-600 hover:bg-gray-50"
+                >
+                    <SortIcon fontSize="small" />
+                    정렬
+                    <span className="text-gray-400">· {SORT_LABEL[sort]}</span>
+
+                </button>
+
+                <Menu
+                    anchorEl={anchorEl}
+                    open={open}
+                    onClose={handleClose}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                >
+                    <MenuItem onClick={() => handleSortChange('latest')}>
+                        <div className="flex items-center gap-2">
+                            {sort === 'latest' && <CheckIcon fontSize="small" />}
+                            최신 순
+                        </div>
+                    </MenuItem>
+
+                    <MenuItem onClick={() => handleSortChange('likes')}>
+                        <div className="flex items-center gap-2">
+                            {sort === 'likes' && <CheckIcon fontSize="small" />}
+                            인기 순
+                        </div>
+                    </MenuItem>
+
+                    <MenuItem onClick={() => handleSortChange('bookmarks')}>
+                        <div className="flex items-center gap-2">
+                            {sort === 'bookmarks' && <CheckIcon fontSize="small" />}
+                            즐겨찾기 순
+                        </div>
+                    </MenuItem>
+                </Menu>
+
                 {/* 카드 리스트 */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center mt-4">
                     {concerts.map((concert) => (
                         <ConcertCard key={concert.id} {...concert} />
                     ))}
@@ -201,6 +279,7 @@ export default function ConcertPage() {
                         setSearchParams({
                             q: query,
                             page: value.toString(),
+                            sort,
                         })
                     }}
                     shape="rounded"

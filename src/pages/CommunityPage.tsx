@@ -6,10 +6,22 @@ import PaginationItem from '@mui/material/PaginationItem'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import MovingIcon from '@mui/icons-material/Moving'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import SortIcon from '@mui/icons-material/Sort';
+import CheckIcon from '@mui/icons-material/Check'
 import PostCard from '@/components/PostCard';
 
 /** 페이지당 게시글 수 */
 const PAGE_SIZE = 10
+
+/** 정렬 타입 */
+type SortType = 'latest' | 'likes' | 'views'
+const SORT_LABEL: Record<SortType, string> = {
+  latest: '최신 순',
+  likes: '인기 순',
+  views: '조회수 순',
+}
 
 /** mock 데이터 (나중에 API로 교체) */
 const posts = Array.from({ length: 73 }).map((_, i) => ({
@@ -44,6 +56,30 @@ export default function CommunityPage() {
   const safePage = Math.min(Math.max(page, 1), pageCount)
   const startIndex = (safePage - 1) * PAGE_SIZE
   const pagedPosts = posts.slice(startIndex, startIndex + PAGE_SIZE)
+
+  /** 정렬 */
+  const sort = (searchParams.get('sort') as SortType) ?? 'latest'
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+
+  const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleClose = () => {
+    setAnchorEl(null)
+  }
+
+  const handleSortChange = (value: SortType) => {
+    setSearchParams({
+      q: query,
+      category,
+      page: '1',
+      sort: value,
+    })
+    handleClose()
+  }
+
 
   /** 페이지 변경 시 스크롤 맨 위 */
   useEffect(() => {
@@ -82,6 +118,7 @@ export default function CommunityPage() {
                 q: query,
                 category: c,
                 page: '1',
+                sort,
               })
             }
             className={`px-3 py-1 rounded-full border transition ${category === c
@@ -98,8 +135,48 @@ export default function CommunityPage() {
       <section className="space-y-4">
         <h2 className="text-2xl font-bold flex items-center gap-2">
           <MovingIcon sx={{ color: "#F6339A" }} />
-          커뮤니티 인기글
+          커뮤니티 글
         </h2>
+
+        {/* 정렬 버튼 */}
+        <button
+          onClick={handleOpen}
+          className="flex items-center gap-1 px-3 py-1 text-md border rounded-md text-gray-600 hover:bg-gray-50"
+        >
+          <SortIcon fontSize="small" />
+          정렬
+          <span className="text-gray-400">· {SORT_LABEL[sort]}</span>
+          
+        </button>
+
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <MenuItem onClick={() => handleSortChange('latest')}>
+            <div className="flex items-center gap-2">
+              {sort === 'latest' && <CheckIcon fontSize="small" />}
+              최신 순
+            </div>
+          </MenuItem>
+
+          <MenuItem onClick={() => handleSortChange('likes')}>
+            <div className="flex items-center gap-2">
+              {sort === 'likes' && <CheckIcon fontSize="small" />}
+              인기 순
+            </div>
+          </MenuItem>
+
+          <MenuItem onClick={() => handleSortChange('views')}>
+            <div className="flex items-center gap-2">
+              {sort === 'views' && <CheckIcon fontSize="small" />}
+              조회수 순
+            </div>
+          </MenuItem>
+        </Menu>
 
         {pagedPosts.length === 0 ? (
           <div className="py-20 text-center text-gray-400">
@@ -126,6 +203,7 @@ export default function CommunityPage() {
               setSearchParams({
                 q: query,
                 category,
+                sort,
                 page: value.toString(),
               })
             }
