@@ -57,8 +57,8 @@ export default function CommunityPage() {
         <SearchIcon sx={{ fontSize: 20, color: '#9ca3af' }} />
         <input
           value={inputValue}
-          placeholder="커뮤니티 검색"
-          className="bg-transparent flex-1 outline-none text-sm"
+          placeholder="입력하세요"
+          className="bg-transparent flex-1 outline-none text-xl"
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
