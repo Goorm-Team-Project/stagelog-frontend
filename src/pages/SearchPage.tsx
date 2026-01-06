@@ -1,4 +1,5 @@
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useState } from 'react'
 import ConcertCard from '@/components/ConcertCard'
 import PostCard from '@/components/PostCard'
 import SearchIcon from '@mui/icons-material/Search'
@@ -101,6 +102,13 @@ const posts = [
 export default function SearchPage() {
     const [searchParams] = useSearchParams()
     const query = searchParams.get('q') ?? ''
+    const [inputValue, setInputValue] = useState(query)
+    const navigate = useNavigate()
+
+    const handleSearch = () => {
+        navigate(`/search?q=${inputValue}`)
+    }
+
     return (
         <main className="mx-auto max-w-layout px-4 py-6 space-y-10">
             {/* 검색바 */}
@@ -112,7 +120,13 @@ export default function SearchPage() {
                     }}
                 />
                 <input
-                    defaultValue={query}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            handleSearch()
+                        }
+                    }}
                     placeholder="검색어를 입력하세요"
                     className="bg-transparent flex-1 outline-none text-xl"
                 />
