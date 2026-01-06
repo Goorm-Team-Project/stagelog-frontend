@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import SearchIcon from '@mui/icons-material/Search'
 import Pagination from '@mui/material/Pagination'
 import PaginationItem from '@mui/material/PaginationItem'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import MovingIcon from '@mui/icons-material/Moving'
 import PostCard from '@/components/PostCard';
 
 /** 페이지당 게시글 수 */
@@ -34,29 +35,15 @@ export default function CommunityPage() {
   const category = searchParams.get('category') ?? '전체'
   const page = Number(searchParams.get('page') ?? 1)
 
-  /** (mock) 필터링 */
-  const filteredPosts = posts.filter((post) => {
-    const matchQuery =
-      !query ||
-      post.title.includes(query) ||
-      post.excerpt.includes(query)
-
-    const matchCategory =
-      category === '전체' || post.categoryLabel === category
-
-    return matchQuery && matchCategory
-  })
+  const [inputValue, setInputValue] = useState(query)
 
   /** 페이지네이션 계산 */
-  const totalCount = filteredPosts.length
+  const totalCount = posts.length
   const pageCount = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
 
   const safePage = Math.min(Math.max(page, 1), pageCount)
   const startIndex = (safePage - 1) * PAGE_SIZE
-  const pagedPosts = filteredPosts.slice(
-    startIndex,
-    startIndex + PAGE_SIZE
-  )
+  const pagedPosts = posts.slice(startIndex, startIndex + PAGE_SIZE)
 
   /** 페이지 변경 시 스크롤 맨 위 */
   useEffect(() => {
@@ -69,21 +56,24 @@ export default function CommunityPage() {
       <div className="flex items-center gap-3 bg-gray-100 rounded-full px-4 py-2">
         <SearchIcon sx={{ fontSize: 20, color: '#9ca3af' }} />
         <input
-          value={query}
+          value={inputValue}
           placeholder="커뮤니티 검색"
           className="bg-transparent flex-1 outline-none text-sm"
-          onChange={(e) =>
-            setSearchParams({
-              q: e.target.value,
-              category,
-              page: '1', // 검색 바뀌면 1페이지
-            })
-          }
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              setSearchParams({
+                q: inputValue,
+                page: '1',
+                category,
+              })
+            }
+          }}
         />
       </div>
 
       {/* 카테고리 필터 */}
-      <div className="flex gap-2 text-sm">
+      <div className="flex gap-2 text-md">
         {['전체', '후기', '질문', '정보'].map((c) => (
           <button
             key={c}
@@ -94,11 +84,10 @@ export default function CommunityPage() {
                 page: '1',
               })
             }
-            className={`px-3 py-1 rounded-full border transition ${
-              category === c
-                ? 'bg-pink-500 text-white border-pink-500'
-                : 'text-gray-600 hover:bg-gray-50'
-            }`}
+            className={`px-3 py-1 rounded-full border transition ${category === c
+              ? 'bg-pink-500 text-white border-pink-500'
+              : 'text-gray-600 hover:bg-gray-50'
+              }`}
           >
             {c}
           </button>
@@ -107,8 +96,9 @@ export default function CommunityPage() {
 
       {/* 커뮤니티 글 리스트 */}
       <section className="space-y-4">
-        <h2 className="text-lg font-bold flex items-center gap-2">
-          💬 커뮤니티 글
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <MovingIcon sx={{ color: "#F6339A" }} />
+          커뮤니티 인기글
         </h2>
 
         {pagedPosts.length === 0 ? (
@@ -119,15 +109,7 @@ export default function CommunityPage() {
           pagedPosts.map((post) => (
             <PostCard
               key={post.id}
-              authorName={post.authorName}
-              createdAtLabel={post.createdAtLabel}
-              title={post.title}
-              excerpt={post.excerpt}
-              likeCount={post.likeCount}
-              commentCount={post.commentCount}
-              userBadgeName={post.userBadgeName}
-              categoryLabel={post.categoryLabel}
-              concertName={post.concertName}
+              {...post}
               onClick={() => navigate(`/community/${post.id}`)}
             />
           ))
