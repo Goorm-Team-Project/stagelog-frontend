@@ -7,6 +7,7 @@ import HomePage from '@/pages/HomePage'
 import LoginPage from '@/pages/LoginPage'
 import RegisterPage from '@/pages/RegisterPage'
 import SearchPage from '@/pages/SearchPage'
+import ConcertPage from '@/pages/ConcertPage'
 
 
 
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
     element: <SubLayout />,
     children: [
       { path: '/search', element: <SearchPage /> },
+      { path: '/concerts', element: <ConcertPage /> },
     ]
   },
   {
