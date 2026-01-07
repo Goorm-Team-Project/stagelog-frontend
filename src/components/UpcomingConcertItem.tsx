@@ -1,21 +1,21 @@
 interface UpcomingConcertItemProps {
+  concertId: number
   imageUrl: string
   artist: string
   title: string
   dateLabel: string
-  onJoinClick?: () => void
 }
 
 export default function UpcomingConcertItem({
+  concertId,
   imageUrl,
   artist,
   title,
   dateLabel,
-  onJoinClick,
 }: UpcomingConcertItemProps) {
   const handleJoinClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    onJoinClick?.()
+    window.location.href = `/concerts/${concertId}`
   }
 
   return (
