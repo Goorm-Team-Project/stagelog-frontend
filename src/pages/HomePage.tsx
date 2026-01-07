@@ -1,10 +1,10 @@
+import { useNavigate } from "react-router-dom";
 import ConcertCard from "@/components/ConcertCard";
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import MovingIcon from '@mui/icons-material/Moving';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable'
 import PostCard from "@/components/PostCard";
 import UpcomingConcertItem from "@/components/UpcomingConcertItem";
-
 
 const concerts = [ // 콘서트 데이터 예시
   {
@@ -148,35 +148,35 @@ const posts = [ // 커뮤니티 글 데이터 예시
 
 const upcomingConcerts = [
   {
-    id: 1,
+    concertId: 1,
     imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
     artist: 'BLACKPINK',
     title: 'BORN PINK ENCORE CONCERT',
     dateLabel: '2025년 2월 10일 · 서울',
   },
   {
-    id: 2,
+    concertId: 2,
     imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
     artist: 'NewJeans',
     title: 'GET UP CONCERT',
     dateLabel: '2025년 3월 22일 ~ 23일',
   },
   {
-    id: 3,
+    concertId: 3,
     imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
     artist: 'Seventeen',
     title: 'FOLLOW AGAIN TOUR',
     dateLabel: '2025년 4월 5일 ~ 7일',
   },
   {
-    id: 4,
+    concertId: 4,
     imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
     artist: 'Stray Kids',
     title: 'STRAY KIDS CONCERT',
     dateLabel: '2025년 5월 3일',
   },
   {
-    id: 5,
+    concertId: 5,
     imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
     artist: 'ITZY',
     title: 'CHECKMATE WORLD TOUR',
@@ -187,6 +187,7 @@ const upcomingConcerts = [
 
 
 export default function HomePage() {
+  const navigate = useNavigate()
   return (
     <main className="mx-auto max-w-layout flex flex-col gap-24">
       {/* 진행 중인 공연 섹션 */}
@@ -197,7 +198,9 @@ export default function HomePage() {
             진행 중인 공연
           </h2>
 
-          <button className="text-lg font-semibold text-pink-500 hover:underline">
+          <button 
+          onClick={() => navigate('/concerts')}
+          className="text-lg font-semibold text-pink-500 hover:underline">
             전체보기 →
           </button>
         </div>
@@ -232,7 +235,7 @@ export default function HomePage() {
         <div className="rounded-xl border bg-white p-4 border border-gray-100 shadow-md">
           <ul className="space-y-3">
             {upcomingConcerts.map((concert) => (
-              <UpcomingConcertItem key={concert.id} {...concert} />
+              <UpcomingConcertItem key={concert.concertId} {...concert} />
             ))}
           </ul>
         </div>
