@@ -9,6 +9,7 @@ import RegisterPage from '@/pages/RegisterPage'
 import SearchPage from '@/pages/SearchPage'
 import ConcertPage from '@/pages/ConcertPage'
 import CommunityPage from '@/pages/CommunityPage'
+import ConcertCommunityPage from '@/pages/ConcertCommunityPage'
 
 
 
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
       { path: '/search', element: <SearchPage /> },
       { path: '/concerts', element: <ConcertPage /> },
       { path: '/community', element: <CommunityPage /> },
+      { path: '/concerts/:id/posts', element: <ConcertCommunityPage /> },
     ]
   },
   {
