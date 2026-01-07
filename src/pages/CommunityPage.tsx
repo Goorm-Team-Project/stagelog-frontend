@@ -88,28 +88,8 @@ export default function CommunityPage() {
 
   return (
     <main className="mx-auto max-w-layout px-4 py-6 space-y-6">
-      {/* 검색바 */}
-      <div className="flex items-center gap-3 bg-gray-100 rounded-full px-4 py-2">
-        <SearchIcon sx={{ fontSize: 20, color: '#9ca3af' }} />
-        <input
-          value={inputValue}
-          placeholder="입력하세요"
-          className="bg-transparent flex-1 outline-none text-xl"
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              setSearchParams({
-                q: inputValue,
-                page: '1',
-                category,
-              })
-            }
-          }}
-        />
-      </div>
-
       {/* 카테고리 필터 */}
-      <div className="flex gap-2 text-md">
+      <div className="flex gap-2 text-md justify-center">
         {['전체', '후기', '질문', '정보'].map((c) => (
           <button
             key={c}
@@ -129,6 +109,26 @@ export default function CommunityPage() {
             {c}
           </button>
         ))}
+      </div>
+
+      {/* 검색바 */}
+      <div className="flex items-center gap-3 bg-gray-100 rounded-full px-4 py-2">
+        <SearchIcon sx={{ fontSize: 20, color: '#9ca3af' }} />
+        <input
+          value={inputValue}
+          placeholder="입력하세요"
+          className="bg-transparent flex-1 outline-none text-xl"
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              setSearchParams({
+                q: inputValue,
+                page: '1',
+                category,
+              })
+            }
+          }}
+        />
       </div>
 
       {/* 커뮤니티 글 리스트 */}

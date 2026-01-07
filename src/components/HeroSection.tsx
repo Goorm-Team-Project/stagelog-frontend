@@ -68,7 +68,7 @@ export default function HeroSection({ concertId, imageUrl, artist, concertName, 
                             </Link>
 
                             {concertId ? <></> : <> <Link
-                                to="/create"
+                                to="/community"
                                 className="inline-flex items-center justify-center rounded-full bg-white/20 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/30"
                             >
                                 커뮤니티 둘러보기
