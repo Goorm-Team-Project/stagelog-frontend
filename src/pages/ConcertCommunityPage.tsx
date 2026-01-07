@@ -207,7 +207,7 @@ export default function ConcertCommunityPage() {
             <PostCard
               key={post.id}
               {...post}
-              onClick={() => navigate(`/community/${post.id}`)}
+              onClick={() => navigate(`/posts/${post.id}`)}
             />
           ))
         )}
