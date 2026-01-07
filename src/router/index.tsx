@@ -12,6 +12,7 @@ import CommunityPage from '@/pages/CommunityPage'
 import ConcertDetailPage from '@/pages/ConcertDetailPage'
 import ConcertCommunityPage from '@/pages/ConcertCommunityPage'
 import PostPage from '@/pages/PostPage'
+import PostWritePage from '@/pages/PostWritePage'
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
       { path: '/posts/:id', element: <PostPage /> },
       { path: '/concerts/:id', element: <ConcertDetailPage /> },
       { path: '/concerts/:id/posts', element: <ConcertCommunityPage /> },
+      { path: '/concerts/:id/posts/new', element: <PostWritePage /> },
     ]
   },
   {
