@@ -9,7 +9,7 @@ type UserBadgeProps = {
 };
 
 export function UserBadgeChip({ badge }: UserBadgeProps) {
-    badge.color = badge.color || 'black';
+    badge.color = badge.color || 'bg-black';
   return (
     <span className={`rounded-full ${badge.color} px-2.5 py-1 text-[11px] font-semibold text-white`}>
       {badge.name}
