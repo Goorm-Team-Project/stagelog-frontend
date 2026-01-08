@@ -133,11 +133,7 @@ export default function PostPage() {
                 {/* 메타 정보 */}
                 <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-gray-500">
                     <div className='flex items-center gap-1'>
-                        <span className="font-medium text-gray-900">팬덤_러버</span>
-
-                        <span className="rounded-full bg-black px-2 py-0.5 text-[11px] text-white">
-                            IVE
-                        </span>
+                        <span className="font-medium text-xl text-gray-900">팬덤_러버</span>
                     </div>
                     <div className='flex items-center gap-1'>
                         <div className='flex items-center gap-3'>
@@ -227,10 +223,6 @@ export default function PostPage() {
                             <div className="flex justify-between text-xs text-gray-500">
                                 <div className='flex items-center gap-1'>
                                     <span className="font-medium text-gray-900">팬덤_러버</span>
-
-                                    <span className="rounded-full bg-black px-2 py-0.5 text-[11px] text-white">
-                                        IVE
-                                    </span>
                                 </div>
                                 <span>방금 전</span>
                             </div>

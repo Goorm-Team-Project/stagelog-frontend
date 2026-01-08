@@ -10,7 +10,6 @@ type PostCardProps = {
     excerpt: string;
     likeCount: number;
     commentCount: number;
-    userBadgeName?: string;
     categoryLabel?: string;
     concertName?: string;
     onClick?: () => void;
@@ -23,7 +22,6 @@ export default function PostCard({
     excerpt,
     likeCount,
     commentCount,
-    userBadgeName,
     categoryLabel = "후기",
     concertName,
     onClick,
@@ -42,12 +40,6 @@ export default function PostCard({
             {/* 상단 메타 */}
             <div className="flex items-center gap-1">
                 <span className="font-semibold text-gray-900">{authorName}</span>
-
-                {userBadgeName && (
-                    <span className="rounded-full bg-gray-900 px-2.5 py-1 text-[11px] font-semibold text-white">
-                        {userBadgeName}
-                    </span>
-                )}
 
                 <span className="ml-2 text-gray-500">
                     <AccessTimeIcon sx={{ fontSize: 18 }} />

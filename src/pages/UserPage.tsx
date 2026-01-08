@@ -1,8 +1,3 @@
-import { useState } from 'react'
-import PinkSwitch from '@/components/PinkSwitch'
-import ConcertCard from '@/components/ConcertCard'
-import { UserBadgeChip } from '@/components/UserBadgeChip'
-
 export default function MyPage() {
   /* ===== mock ===== */
   const user = {
@@ -13,24 +8,12 @@ export default function MyPage() {
     id: 'test_id15348',
     email: 'test_id15348@test.com',
   }
-
-  const badges = [
-    { name: 'IVE' },
-    { name: 'BLACKPINK' },
-    { name: 'IU' },
-    { name: 'BTS' },
-    { name: 'ONCE' },
-    { name: 'SMTOWN' },
-  ]
   return (
     <main className="mx-auto max-w-[1024px] px-4 py-8 space-y-10">
       {/* ================= 프로필 ================= */}
       <section className="space-y-2">
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-bold">{user.nickname}</h1>
-          <span className="rounded-full bg-black px-2 py-0.5 text-xs text-white">
-            IVE
-          </span>
         </div>
 
         <p className="text-sm text-gray-500">
@@ -63,28 +46,6 @@ export default function MyPage() {
           </span>
         </div>
       </section>
-
-
-      {/* ================= 뱃지 ================= */}
-        <section className="space-y-4">
-        <h2 className="font-bold">뱃지</h2>
-
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-            {badges.map((badge) => (
-            <div
-                key={badge.name}
-                className="
-                w-[140px] h-[140px]
-                flex items-center justify-center
-                rounded-lg border border-gray-200
-                bg-white
-                "
-            >
-                <UserBadgeChip badge={badge} />
-            </div>
-            ))}
-        </div>
-        </section>
     </main>
   )
 }

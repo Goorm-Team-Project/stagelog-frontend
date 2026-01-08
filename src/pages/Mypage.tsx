@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import PinkSwitch from '@/components/PinkSwitch'
 import ConcertCard from '@/components/ConcertCard'
-import { UserBadgeChip } from '@/components/UserBadgeChip'
+// import { UserBadgeChip } from '@/components/UserBadgeChip'
 
 export default function MyPage() {
   /* ===== mock ===== */
@@ -32,16 +32,7 @@ export default function MyPage() {
     liked: true,
     likeCount: 12453,
   }))
-
-  const badges = [
-    { name: 'IVE' },
-    { name: 'BLACKPINK' },
-    { name: 'IU' },
-    { name: 'BTS' },
-    { name: 'ONCE' },
-    { name: 'SMTOWN' },
-  ]
-  const [selectedBadge, setSelectedBadge] = useState<string>('IVE')
+  
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   const [nickname, setNickname] = useState(user.nickname)
   return (
@@ -50,9 +41,6 @@ export default function MyPage() {
       <section className="space-y-2">
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-bold">{user.nickname}</h1>
-          <span className="rounded-full bg-black px-2 py-0.5 text-xs text-white">
-            IVE
-          </span>
         </div>
 
         <p className="text-sm text-gray-500">
@@ -208,40 +196,6 @@ export default function MyPage() {
           ))}
         </div>
       </section>
-
-      {/* ================= 뱃지 ================= */}
-      <section className="space-y-4">
-        <h2 className="font-bold">뱃지</h2>
-
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-          {badges.map((badge) => {
-            const isSelected = selectedBadge === badge.name
-
-            return (
-              <button
-                key={badge.name}
-                type="button"
-                onClick={() => setSelectedBadge(badge.name)}
-                className={`
-            w-[140px] h-[140px] flex items-center justify-center rounded-lg border transition
-            ${isSelected
-                    ? 'border-2 border-pink-500'
-                    : 'border-gray-200 hover:bg-gray-50'}
-          `}
-              >
-                <UserBadgeChip badge={badge} />
-              </button>
-            )
-          })}
-        </div>
-      </section>
-
-      {/* ================= 저장 ================= */}
-      <div className="flex justify-center pt-6">
-        <button className="rounded-full bg-pink-500 px-10 py-3 text-sm font-semibold text-white">
-          변경 저장
-        </button>
-      </div>
     </main>
   )
 }

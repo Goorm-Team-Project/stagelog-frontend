@@ -34,7 +34,6 @@ const posts = Array.from({ length: 73 }).map((_, i) => ({
     '이번 공연 다녀왔는데 생각보다 음향이 좋았어요. 좌석은 3층이었는데도 무대가 잘 보였습니다.',
   likeCount: Math.floor(Math.random() * 100),
   commentCount: Math.floor(Math.random() * 30),
-  userBadgeName: i % 2 === 0 ? 'BLACKPINK' : undefined,
   categoryLabel: ['후기', '질문', '정보'][i % 3],
   concertName: '2025 WORLD TOUR - SEOUL'
 }))
