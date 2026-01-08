@@ -14,6 +14,7 @@ import ConcertCommunityPage from '@/pages/ConcertCommunityPage'
 import PostPage from '@/pages/PostPage'
 import PostWritePage from '@/pages/PostWritePage'
 import Mypage from '@/pages/Mypage'
+import UserPage from '@/pages/UserPage'
 
 export const router = createBrowserRouter([
   {
@@ -32,7 +33,8 @@ export const router = createBrowserRouter([
       { path: '/concerts/:id', element: <ConcertDetailPage /> },
       { path: '/concerts/:id/posts', element: <ConcertCommunityPage /> },
       { path: '/concerts/:id/posts/new', element: <PostWritePage /> },
-      { path: '/mypage', element: <Mypage /> }
+      { path: '/mypage', element: <Mypage /> },
+      { path: '/users/:id', element: <UserPage /> }
     ]
   },
   {
