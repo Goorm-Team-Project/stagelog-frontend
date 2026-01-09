@@ -10,6 +10,8 @@ const logoClass =
 export default function LoginPage() {
   const handleKakaoLogin = () => {
     console.log('카카오 로그인')
+    // TODO: 카카오 로그인 url 접속
+    
   }
 
   const handleNaverLogin = () => {
