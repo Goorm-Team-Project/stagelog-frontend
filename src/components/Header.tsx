@@ -3,6 +3,12 @@ import { useState } from 'react'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 import SearchIcon from '@mui/icons-material/Search'
+import IconButton from '@mui/material/IconButton'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import { useAuth } from '@/hooks/useAuth'
 
 const logoClass =
   'text-3xl font-bold leading-[1.25] bg-gradient-to-r from-[#F6339A] to-[#9810FA] bg-clip-text text-transparent'
@@ -25,6 +31,18 @@ const searchFieldSx = {
 export default function Header() {
   const navigate = useNavigate()
   const [keyword, setKeyword] = useState('')
+
+  const { user, isLoggedIn, logout, login } = useAuth()
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+
+  const handleMenuOpen = (e: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(e.currentTarget)
+  }
+
+  const handleMenuClose = () => {
+    setAnchorEl(null)
+  }
 
   const handleSearch = () => {
     if (!keyword.trim()) return
@@ -70,12 +88,81 @@ export default function Header() {
             sx={searchFieldSx}
           />
 
-          <Link
-            to="/login"
-            className="px-3 py-2 text-xl font-medium text-black rounded-lg"
-          >
-            로그인
-          </Link>
+          <div className="flex items-center gap-6">
+            {/* 🔔 알림 버튼 */}
+            {isLoggedIn && (
+              <IconButton>
+                <NotificationsNoneIcon sx={{ fontSize: 28, color: 'black' }} />
+              </IconButton>
+            )}
+
+            {/* 👤 사용자 버튼 */}
+            {isLoggedIn ? (
+              <>
+                <IconButton onClick={handleMenuOpen}>
+                  {/* 프로필 원 */}
+                  <PersonOutlineIcon sx={{ fontSize: 28, color: 'black' }} />
+                </IconButton>
+
+                {/* ▼ 드롭다운 메뉴 */}
+                <Menu
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleMenuClose}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  PaperProps={{
+                    sx: {
+                      borderRadius: '16px',
+                      minWidth: 180,
+                      padding: 1,
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                    },
+                  }}
+                >
+                  {/* 유저 정보 */}
+                  <div className="flex flex-col items-start gap-2 px-2">
+                    <span className="px-2 py-0.5 text-xs font-semibold text-pink-600 bg-pink-100 rounded-full">
+                      Lv. {user?.level}
+                    </span>
+
+                    <div className="pl-2 text-lg font-bold text-black">
+                      {user?.nickname}
+                    </div>
+                  </div>
+
+                  <div className="my-1 h-px w-full bg-gray-200" />
+
+
+                  <MenuItem
+                    onClick={() => {
+                      handleMenuClose()
+                      navigate('/mypage')
+                    }}
+                  >
+                    마이 페이지
+                  </MenuItem>
+
+                  <MenuItem
+                    onClick={() => {
+                      handleMenuClose()
+                      logout()
+                    }}
+                    sx={{ color: '#6B7280' }}
+                  >
+                    로그아웃
+                  </MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="px-3 py-2 text-xl font-medium text-black rounded-lg"
+              >
+                로그인
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </header>
