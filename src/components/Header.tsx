@@ -9,6 +9,7 @@ import MenuItem from '@mui/material/MenuItem'
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { useAuth } from '@/hooks/useAuth'
+import { AuthService } from '@/services/AuthService'
 
 const logoClass =
   'text-3xl font-bold leading-[1.25] bg-gradient-to-r from-[#F6339A] to-[#9810FA] bg-clip-text text-transparent'
@@ -32,7 +33,7 @@ export default function Header() {
   const navigate = useNavigate()
   const [keyword, setKeyword] = useState('')
 
-  const { user, isLoggedIn, logout, login } = useAuth()
+  const { user, isLoggedIn } = useAuth()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
 
@@ -146,7 +147,7 @@ export default function Header() {
                   <MenuItem
                     onClick={() => {
                       handleMenuClose()
-                      logout()
+                      AuthService.logout()
                     }}
                     sx={{ color: '#6B7280' }}
                   >

@@ -53,6 +53,12 @@ export const AuthService = {
     )
   },
 
+  logout() {
+    return httpService.post('/auth/logout', {
+      refresh_token: tokenManager.getRefresh(),
+    })
+  },
+
   // 마이페이지 정보 조회
   mypage() {
     return httpService.get('/users/me')

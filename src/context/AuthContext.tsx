@@ -26,13 +26,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = () => {
-    tokenManager.clearAll()
-    setUser(null)
-  }
+    try {
+      AuthService.logout()
+    } catch {}
+    finally {
+      tokenManager.clearAll()
+      setUser(null)
+    }
+}
 
   useEffect(() => {
     const restoreLogin = async () => {
-      const refreshToken = tokenManager.getRefresh() 
+      const refreshToken = tokenManager.getRefresh()
 
       // refresh token 없으면 로그인 시도 안 함
       if (!refreshToken) {
