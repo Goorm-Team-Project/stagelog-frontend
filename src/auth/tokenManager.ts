@@ -1,6 +1,7 @@
 // auth/tokenManager.ts
+const REFRESH_KEY = 'refresh_token'
+
 let accessToken: string | null = null
-let refreshToken: string | null = null
 let registerToken: string | null = null
 
 export const tokenManager = {
@@ -17,13 +18,15 @@ export const tokenManager = {
 
   /* refresh token */
   setRefresh(token: string) {
-    refreshToken = token
+    localStorage.setItem(REFRESH_KEY, token)
   },
+
   getRefresh() {
-    return refreshToken
+    return localStorage.getItem(REFRESH_KEY)
   },
+
   clearRefresh() {
-    refreshToken = null
+    localStorage.removeItem(REFRESH_KEY)
   },
 
   /* register token */
@@ -39,7 +42,7 @@ export const tokenManager = {
 
   clearAll() {
     accessToken = null
-    refreshToken = null
+    localStorage.removeItem(REFRESH_KEY)
     registerToken = null
   },
 }
