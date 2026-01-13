@@ -15,6 +15,7 @@ import PostPage from '@/pages/PostPage'
 import PostWritePage from '@/pages/PostWritePage'
 import Mypage from '@/pages/Mypage'
 import UserPage from '@/pages/UserPage'
+import OAuthCallbackPage from '@/pages/OAuthCallbackPage'
 
 export const router = createBrowserRouter([
   {
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
     children: [
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },
+      { path: '/auth/:provider/callback', element: <OAuthCallbackPage /> }
     ],
   }
 ])

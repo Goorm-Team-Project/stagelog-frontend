@@ -2,26 +2,13 @@ import { Link } from 'react-router-dom'
 import Kakao from '@/assets/icons/kakao.svg'
 import Naver from '@/assets/icons/naver.svg'
 import Google from '@/assets/icons/google.svg'
+import { startOAuthLogin } from '@/services/oauth'
 
 const logoClass =
   'text-4xl font-bold leading-[1.25] bg-gradient-to-r from-[#F6339A] to-[#9810FA] bg-clip-text text-transparent'
 
 
 export default function LoginPage() {
-  const handleKakaoLogin = () => {
-    console.log('카카오 로그인')
-    // TODO: 카카오 로그인 url 접속
-    
-  }
-
-  const handleNaverLogin = () => {
-    console.log('네이버 로그인')
-  }
-
-  const handleGoogleLogin = () => {
-    console.log('구글 로그인')
-  }
-
   return (
     <div className="flex items-center justify-center">
       <div className="w-full max-w-[480px] rounded-xl bg-white px-8 py-[120px]">
@@ -43,7 +30,7 @@ export default function LoginPage() {
         <div className="space-y-4">
           {/* 카카오 */}
           <button
-            onClick={handleKakaoLogin}
+            onClick={() => startOAuthLogin('kakao')}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#FEE500] py-3 text-m font-semibold text-black hover:brightness-95"
           >
             <img src={Kakao} alt="Kakao Logo" className="h-5" />
@@ -52,7 +39,7 @@ export default function LoginPage() {
 
           {/* 네이버 */}
           <button
-            onClick={handleNaverLogin}
+            onClick={() => startOAuthLogin('naver')}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#03C75A] py-3 text-m font-semibold text-white hover:brightness-95"
           >
             <img src={Naver} alt="Naver Logo" className="h-5" />
@@ -61,7 +48,7 @@ export default function LoginPage() {
 
           {/* 구글 */}
           <button
-            onClick={handleGoogleLogin}
+            onClick={() => startOAuthLogin('google')}
             className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 py-3 text-m font-semibold text-gray-700 hover:bg-gray-50"
           >
             <img src={Google} alt="Google Logo" className="h-5" />

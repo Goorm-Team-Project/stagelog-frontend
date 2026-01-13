@@ -3,37 +3,38 @@ import { AuthService } from "@/services/AuthService";
 import { createContext, useEffect, useState } from "react";
 
 interface User {
-    id: string;
-    nickname: string;
-    level: number;
+  id: string;
+  nickname: string;
+  level: number;
 }
 
 interface AuthContextType {
-    user: User | null;
-    isLoggedIn: boolean;
-    login: (user: User) => void;
-    logout: () => void;
+  user: User | null;
+  isLoggedIn: boolean;
+  login: (user: User) => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [initialized, setInitialized] = useState(false) 
+  const [initialized, setInitialized] = useState(false)
 
   const login = (userData: User) => {
     setUser(userData)
   }
 
-  const logout = () => {
+  const logout = async () => {
     try {
-      AuthService.logout()
-    } catch {}
-    finally {
+      await AuthService.logout()
+    } catch (e) {
+      // 서버 실패해도 무조건 로그아웃
+    } finally {
       tokenManager.clearAll()
       setUser(null)
     }
-}
+  }
 
   useEffect(() => {
     const restoreLogin = async () => {
