@@ -1,17 +1,40 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import CoverImageUploader from '@/components/CoverImageUploader'
+import { PostService } from '@/services/PostService'
 
 export default function PostWritePage() {
     const navigate = useNavigate()
+    const { id } = useParams<{ id: string }>()
 
     const [category, setCategory] = useState('')
     const [title, setTitle] = useState('')
     const [content, setContent] = useState('')
     const [coverImage, setCoverImage] = useState<File | null>(null)
 
-    const canSubmit = category && title && content
+    const canSubmit =
+        category.trim().length > 0 &&
+        title.trim().length > 0 &&
+        content.trim().length > 0
+
+    const handleSubmit = () => {
+        if (canSubmit) {
+            PostService.createPost(
+                {
+                    id: Number(id),
+                    category: category,
+                    title: title,
+                    content: content,
+                    // coverImage는 추후 구현
+                }).then(() => {
+                    navigate(`/concerts/${id}/posts`)
+                })
+                .catch((error) => {
+                    console.error('Error creating post:', error)
+                })
+        }
+    }
 
     return (
         <main className="mx-auto max-w-layout px-4 py-8">
@@ -108,15 +131,7 @@ export default function PostWritePage() {
                                 ? 'bg-pink-500 hover:bg-pink-600'
                                 : 'bg-gray-300 cursor-not-allowed'}
             `}
-                        onClick={() => {
-                            console.log({
-                                category,
-                                title,
-                                content,
-                            })
-                            // TODO: API 연동
-                            navigate('/community')
-                        }}
+                        onClick={handleSubmit}
                     >
                         등록
                     </button>

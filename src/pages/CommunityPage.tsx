@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import SearchIcon from '@mui/icons-material/Search'
 import Pagination from '@mui/material/Pagination'
 import PaginationItem from '@mui/material/PaginationItem'
@@ -11,46 +11,48 @@ import MenuItem from '@mui/material/MenuItem'
 import SortIcon from '@mui/icons-material/Sort';
 import CheckIcon from '@mui/icons-material/Check'
 import PostCard from '@/components/PostCard';
+import { PostService } from '@/services/PostService'
 
 /** 페이지당 게시글 수 */
 const PAGE_SIZE = 10
 
 /** 정렬 타입 */
-type SortType = 'latest' | 'likes' | 'views'
+type SortType = 'latest' | 'popular' | 'views'
 const SORT_LABEL: Record<SortType, string> = {
   latest: '최신 순',
-  likes: '인기 순',
+  popular: '인기 순',
   views: '조회수 순',
 }
 
-/** mock 데이터 (나중에 API로 교체) */
-const posts = Array.from({ length: 73 }).map((_, i) => ({
-  id: i + 1,
-  authorName: `사용자${i + 1}`,
-  createdAtLabel: '2026-01-01 18:26',
-  title: '방탄콘 리얼 후기',
-  excerpt:
-    '이번 공연 다녀왔는데 생각보다 음향이 좋았어요. 좌석은 3층이었는데도 무대가 잘 보였습니다.',
-  likeCount: Math.floor(Math.random() * 100),
-  commentCount: Math.floor(Math.random() * 30),
-  categoryLabel: ['후기', '질문', '정보'][i % 3],
-  concertName: '2025 WORLD TOUR - SEOUL'
-}))
-
 export default function CommunityPage() {
-  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const [posts, setPosts] = useState(Array<{
+    post_id: number;
+    event: {
+        event_id: number;
+        title: string;
+    }
+    user_id: number;
+    nickname: string;
+    created_at: string;
+    title: string;
+    content: string;
+    like: number;
+    dislike: number;
+    views: number;
+    category?: string;
+  }>())
 
   /** URL 쿼리 */
-  const query = searchParams.get('q') ?? ''
+  const query = searchParams.get('search') ?? ''
   const category = searchParams.get('category') ?? '전체'
   const page = Number(searchParams.get('page') ?? 1)
 
   const [inputValue, setInputValue] = useState(query)
 
   /** 페이지네이션 계산 */
-  const totalCount = posts.length
-  const pageCount = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
+  const [totalCount, setTotalCount] = useState(0)
+  const [pageCount, setPageCount] = useState(1)
 
   const safePage = Math.min(Math.max(page, 1), pageCount)
   const startIndex = (safePage - 1) * PAGE_SIZE
@@ -71,7 +73,7 @@ export default function CommunityPage() {
 
   const handleSortChange = (value: SortType) => {
     setSearchParams({
-      q: query,
+      search: query,
       category,
       page: '1',
       sort: value,
@@ -83,7 +85,24 @@ export default function CommunityPage() {
   /** 페이지 변경 시 스크롤 맨 위 */
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [safePage])
+
+    PostService.getPostList({
+      category,
+      search: query,
+      sort,
+      page: safePage,
+      size: PAGE_SIZE
+    })
+    .then((res) => {
+      const responseData = res.data.data
+      setPosts(responseData.posts)
+      setTotalCount(responseData.total_count)
+      setPageCount(responseData.total_pages)
+    })
+    .catch((error) => {
+      console.error('Error fetching posts:', error)
+    })
+  }, [safePage, category, query, sort])
 
   return (
     <main className="mx-auto max-w-layout px-4 py-6 space-y-6">
@@ -94,7 +113,7 @@ export default function CommunityPage() {
             key={c}
             onClick={() =>
               setSearchParams({
-                q: query,
+                search: query,
                 category: c,
                 page: '1',
                 sort,
@@ -121,7 +140,7 @@ export default function CommunityPage() {
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               setSearchParams({
-                q: inputValue,
+                search: inputValue,
                 page: '1',
                 category,
               })
@@ -162,9 +181,9 @@ export default function CommunityPage() {
             </div>
           </MenuItem>
 
-          <MenuItem onClick={() => handleSortChange('likes')}>
+          <MenuItem onClick={() => handleSortChange('popular')}>
             <div className="flex items-center gap-2">
-              {sort === 'likes' && <CheckIcon fontSize="small" />}
+              {sort === 'popular' && <CheckIcon fontSize="small" />}
               인기 순
             </div>
           </MenuItem>
@@ -177,16 +196,15 @@ export default function CommunityPage() {
           </MenuItem>
         </Menu>
 
-        {pagedPosts.length === 0 ? (
+        {posts.length === 0 ? (
           <div className="py-20 text-center text-gray-400">
             검색 결과가 없습니다.
           </div>
         ) : (
-          pagedPosts.map((post) => (
+          posts.map((post) => (
             <PostCard
-              key={post.id}
+              key={post.post_id}
               {...post}
-              onClick={() => navigate(`/posts/${post.id}`)}
             />
           ))
         )}
@@ -200,7 +218,7 @@ export default function CommunityPage() {
             page={safePage}
             onChange={(_, value) =>
               setSearchParams({
-                q: query,
+                search: query,
                 category,
                 sort,
                 page: value.toString(),
