@@ -1,30 +1,48 @@
 interface UpcomingConcertItemProps {
-  concertId: number
-  imageUrl: string
+  event_id: number
+  poster: string
   artist: string
   title: string
-  dateLabel: string
+  start_date: string
+  end_date?: string
 }
 
 export default function UpcomingConcertItem({
-  concertId,
-  imageUrl,
+  event_id,
+  poster,
   artist,
   title,
-  dateLabel,
+  start_date,
+  end_date,
 }: UpcomingConcertItemProps) {
   const handleJoinClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    window.location.href = `/concerts/${concertId}`
+    window.location.href = `/concerts/${event_id}/posts`
   }
+
+  const handleDetailClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    window.location.href = `/concerts/${event_id}`
+  }
+
+  const formatKoreanDate = (date: string) => {
+  const d = new Date(date)
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`
+}
+
+  const formatDateRange = (start: string, end?: string) =>
+  end && start !== end
+    ? `${formatKoreanDate(start)} - ${formatKoreanDate(end)}`
+    : formatKoreanDate(start)
 
   return (
     <li
+      onClick={handleJoinClick}
       className="flex cursor-pointer items-center gap-3 rounded-lg p-2 px-4 transition hover:bg-gray-50"
     >
       {/* 썸네일 */}
       <img
-        src={imageUrl}
+        src={poster}
         alt={title}
         className="h-10 w-10 rounded-md object-cover"
       />
@@ -38,16 +56,16 @@ export default function UpcomingConcertItem({
           {title}
         </p>
         <p className="text-xs text-gray-500">
-          {dateLabel}
+          {formatDateRange(start_date, end_date)}
         </p>
       </div>
 
       {/* 참여하기 */}
       <button
-        onClick={handleJoinClick}
+        onClick={handleDetailClick}
         className="rounded-full border border-pink-400 px-3 py-1 text-xs font-semibold text-pink-500 hover:bg-pink-50"
       >
-        참여하기
+        상세보기
       </button>
     </li>
   )

@@ -11,154 +11,35 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import SortIcon from '@mui/icons-material/Sort';
 import CheckIcon from '@mui/icons-material/Check'
+import { ConcertService } from '@/services/ConcertService'
 
 const PAGE_SIZE = 12
-const concerts = [ // 콘서트 데이터 예시
-    {
-        id: 1,
-        imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
-        artist: 'BTS',
-        title: '2025 WORLD TOUR - SEOUL',
-        startDate: '2025-01-15',
-        endDate: '2025-01-17',
-        location: '올림픽 체조경기장',
-        liked: true,
-        likeCount: 12453,
-    },
-    {
-        id: 2,
-        imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
-        artist: 'BLACKPINK',
-        title: 'BORN PINK ENCORE CONCERT',
-        startDate: '2025-02-10',
-        location: '고척스카이돔',
-        liked: false,
-        likeCount: 9821,
-    },
-    {
-        id: 3,
-        imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
-        artist: 'NewJeans',
-        title: 'GET UP CONCERT',
-        startDate: '2025-03-22',
-        endDate: '2025-03-23',
-        location: 'KSPO DOME',
-        liked: true,
-        likeCount: 8234,
-    },
-    {
-        id: 4,
-        imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
-        artist: 'SEVENTEEN',
-        title: 'FOLLOW AGAIN TOUR',
-        startDate: '2025-04-05',
-        endDate: '2025-04-07',
-        location: '잠실 올림픽 주경기장',
-        liked: false,
-        likeCount: 7754,
-    },
-    {
-        id: 5,
-        imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
-        artist: 'BTS',
-        title: '2025 WORLD TOUR - SEOUL',
-        startDate: '2025-01-15',
-        endDate: '2025-01-17',
-        location: '올림픽 체조경기장',
-        liked: true,
-        likeCount: 12453,
-    },
-    {
-        id: 6,
-        imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
-        artist: 'BLACKPINK',
-        title: 'BORN PINK ENCORE CONCERT',
-        startDate: '2025-02-10',
-        location: '고척스카이돔',
-        liked: false,
-        likeCount: 9821,
-    },
-    {
-        id: 7,
-        imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
-        artist: 'NewJeans',
-        title: 'GET UP CONCERT',
-        startDate: '2025-03-22',
-        endDate: '2025-03-23',
-        location: 'KSPO DOME',
-        liked: true,
-        likeCount: 8234,
-    },
-    {
-        id: 8,
-        imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
-        artist: 'SEVENTEEN',
-        title: 'FOLLOW AGAIN TOUR',
-        startDate: '2025-04-05',
-        endDate: '2025-04-07',
-        location: '잠실 올림픽 주경기장',
-        liked: false,
-        likeCount: 7754,
-    },
-    {
-        id: 9,
-        imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
-        artist: 'BTS',
-        title: '2025 WORLD TOUR - SEOUL',
-        startDate: '2025-01-15',
-        endDate: '2025-01-17',
-        location: '올림픽 체조경기장',
-        liked: true,
-        likeCount: 12453,
-    },
-    {
-        id: 10,
-        imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
-        artist: 'BLACKPINK',
-        title: 'BORN PINK ENCORE CONCERT',
-        startDate: '2025-02-10',
-        location: '고척스카이돔',
-        liked: false,
-        likeCount: 9821,
-    },
-    {
-        id: 11,
-        imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
-        artist: 'NewJeans',
-        title: 'GET UP CONCERT',
-        startDate: '2025-03-22',
-        endDate: '2025-03-23',
-        location: 'KSPO DOME',
-        liked: true,
-        likeCount: 8234,
-    },
-    {
-        id: 12,
-        imageUrl: 'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
-        artist: 'SEVENTEEN',
-        title: 'FOLLOW AGAIN TOUR',
-        startDate: '2025-04-05',
-        endDate: '2025-04-07',
-        location: '잠실 올림픽 주경기장',
-        liked: false,
-        likeCount: 7754,
-    },
-]
 
-type SortType = 'latest' | 'likes' | 'bookmarks'
+type SortType = 'latest' | 'name' | 'favorite'
 const SORT_LABEL: Record<SortType, string> = {
     latest: '최신 순',
-    likes: '인기 순',
-    bookmarks: '즐겨찾기 순',
+    name: '이름 순',
+    favorite: '즐겨찾기 순',
 }
 
 export default function ConcertPage() {
+    const [concerts, setConcerts] = useState<Array<{
+        event_id: number
+        poster: string
+        title: string
+        artist: string
+        start_date: string
+        end_date?: string
+        venue: string
+        liked?: boolean
+        favorite_count?: number
+    }>>([])
     const [searchParams, setSearchParams] = useSearchParams()
-    const query = searchParams.get('q') ?? ''
+    const query = searchParams.get('search') ?? ''
     const [inputValue, setInputValue] = useState(query)
     const page = Number(searchParams.get('page') ?? 1)
-    const totalCount = 36 // 예시: 총 공연 정보 개수 (나중에 API에서 받아올 예정)
-    const pageCount = Math.ceil(totalCount / PAGE_SIZE)
+    const [ totalCount, setTotalCount] = useState(0)
+    const [ totalPage, setTotalPage] = useState(0)
 
     /** 정렬 */
     const sort = (searchParams.get('sort') as SortType) ?? 'latest'
@@ -175,7 +56,7 @@ export default function ConcertPage() {
 
     const handleSortChange = (value: SortType) => {
         setSearchParams({
-            q: query,
+            search: query,
             page: '1',
             sort: value,
         })
@@ -184,7 +65,23 @@ export default function ConcertPage() {
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' })
-    }, [page])
+
+        ConcertService.getConcertList({
+            search: query,
+            sort,
+            page,
+            size: PAGE_SIZE,
+        })
+        .then((res) => {
+            // TODO: 공연 목록 업데이트
+            setConcerts(res.data.data.events)
+            setTotalCount(res.data.data.total_count)
+            setTotalPage(res.data.data.total_pages)
+        })
+        .catch((error) => {
+            console.error('Error fetching concert list:', error)
+        })
+    }, [page, query, sort])
 
     return (
         <main className="mx-auto max-w-layout px-4 py-6 space-y-10">
@@ -204,7 +101,7 @@ export default function ConcertPage() {
                     onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                             setSearchParams({
-                                q: inputValue,
+                                search: inputValue,
                                 page: '1',
                             })
                         }
@@ -229,7 +126,7 @@ export default function ConcertPage() {
                 >
                     <SortIcon fontSize="small" />
                     정렬
-                    <span className="text-gray-400">· {SORT_LABEL[sort]}</span>
+                    <span className="text-gray-400">{SORT_LABEL[sort]}</span>
 
                 </button>
 
@@ -247,16 +144,16 @@ export default function ConcertPage() {
                         </div>
                     </MenuItem>
 
-                    <MenuItem onClick={() => handleSortChange('likes')}>
+                    <MenuItem onClick={() => handleSortChange('name')}>
                         <div className="flex items-center gap-2">
-                            {sort === 'likes' && <CheckIcon fontSize="small" />}
-                            인기 순
+                            {sort === 'name' && <CheckIcon fontSize="small" />}
+                            이름 순
                         </div>
                     </MenuItem>
 
-                    <MenuItem onClick={() => handleSortChange('bookmarks')}>
+                    <MenuItem onClick={() => handleSortChange('favorite')}>
                         <div className="flex items-center gap-2">
-                            {sort === 'bookmarks' && <CheckIcon fontSize="small" />}
+                            {sort === 'favorite' && <CheckIcon fontSize="small" />}
                             즐겨찾기 순
                         </div>
                     </MenuItem>
@@ -265,7 +162,7 @@ export default function ConcertPage() {
                 {/* 카드 리스트 */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center mt-4">
                     {concerts.map((concert) => (
-                        <ConcertCard key={concert.id} {...concert} />
+                        <ConcertCard key={concert.event_id} {...concert} />
                     ))}
                 </div>
             </div>
@@ -273,11 +170,11 @@ export default function ConcertPage() {
             {/* 페이지네이션 */}
             <div className="flex justify-center mt-10">
                 <Pagination
-                    count={pageCount}
+                    count={totalPage}
                     page={page}
                     onChange={(_, value) => {
                         setSearchParams({
-                            q: query,
+                            search: query,
                             page: value.toString(),
                             sort,
                         })

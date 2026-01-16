@@ -10,14 +10,14 @@ import FavoriteIcon from '@mui/icons-material/Favorite'
 ======================= */
 
 interface ConcertCardProps {
-  imageUrl: string
+  event_id: number
+  poster: string
   artist: string
   title: string
-  startDate: string   // "2025-01-15"
-  endDate?: string    // "2025-01-17"
-  location: string
-  liked?: boolean
-  likeCount?: number
+  start_date: string   // "2025-01-15"
+  end_date?: string    // "2025-01-17"
+  venue: string
+  favorite_count?: number
 }
 
 /* =======================
@@ -45,14 +45,14 @@ const parseDate = (date: string) => {
 }
 
 const getConcertStatus = (
-  startDate: string,
-  endDate?: string
+  start_date: string,
+  end_date?: string
 ): ConcertStatus => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  const start = parseDate(startDate)
-  const end = endDate ? parseDate(endDate) : start
+  const start = parseDate(start_date)
+  const end = end_date ? parseDate(end_date) : start
   end.setHours(23, 59, 59, 999)
 
   if (today < start) return 'upcoming'
@@ -75,37 +75,31 @@ const formatDateRange = (start: string, end?: string) =>
 ======================= */
 
 export default function ConcertCard({
-  imageUrl,
+  event_id,
+  poster,
   artist,
   title,
-  startDate,
-  endDate,
-  location,
-  liked = false,
-  likeCount = 0,
+  start_date,
+  end_date,
+  venue,
+  favorite_count = 0,
 }: ConcertCardProps) {
   const navigate = useNavigate()
-  const status = getConcertStatus(startDate, endDate)
-  const [isLiked, setIsLiked] = useState(liked)
+  const status = getConcertStatus(start_date, end_date)
 
   /* ---- handlers ---- */
 
   // 카드 전체 클릭 → A 경로
   const handleCardClick = () => {
-    navigate('/concerts/1/posts') // 예: 콘서트 목록 / 요약 페이지
+    navigate(`/concerts/${event_id}/posts`) // 예: 콘서트 목록 / 요약 페이지
   }
 
   // 자세히 보기 → B 경로
   const handleDetailClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    navigate('/concerts/1') // 예: 콘서트 상세 페이지
+    navigate(`/concerts/${event_id}`)
   }
 
-  // 좋아요
-  const handleLikeClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setIsLiked(prev => !prev)
-  }
 
   return (
     <div
@@ -113,29 +107,16 @@ export default function ConcertCard({
       tabIndex={0}
       onClick={handleCardClick}
       onKeyDown={(e) => e.key === 'Enter' && handleCardClick()}
-      className="w-[280px] cursor-pointer overflow-hidden rounded-xl bg-white shadow-md transition hover:shadow-lg"
+      className="w-[280px] h-[420px] cursor-pointer overflow-hidden rounded-xl bg-white shadow-md transition hover:shadow-lg flex flex-col"
     >
       {/* Image */}
       <div className="relative">
         <img
-          src={imageUrl}
+          src={poster}
           alt={title}
           className="h-[200px] w-full object-cover"
         />
 
-        {/* Like */}
-        <button
-          onClick={handleLikeClick}
-          className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white shadow transition hover:scale-105"
-        >
-          {isLiked ? (
-            <FavoriteIcon fontSize="small" className="text-pink-500" />
-          ) : (
-            <FavoriteBorderIcon fontSize="small" className="text-gray-600" />
-          )}
-        </button>
-
-        {/* Status */}
         <span
           className={`absolute right-3 top-3 rounded-full px-2 py-1 text-xs font-semibold text-white ${STATUS_BADGE[status].className}`}
         >
@@ -144,39 +125,46 @@ export default function ConcertCard({
       </div>
 
       {/* Content */}
-      <div className="space-y-2 p-4">
-        <span className="text-xs font-semibold text-pink-500">
-          {artist}
-        </span>
-
-        <h3 className="line-clamp-2 text-sm font-bold text-gray-900">
-          {title}
-        </h3>
-
-        <div className="space-y-1 text-xs text-gray-500">
-          <p className="flex items-center gap-1">
-            <CalendarMonthIcon fontSize="small" />
-            {formatDateRange(startDate, endDate)}
-          </p>
-          <p className="flex items-center gap-1">
-            <PlaceIcon fontSize="small" />
-            {location}
-          </p>
-        </div>
-
-        <div className="flex items-center justify-between pt-2">
-          <span className="flex items-center gap-1 text-xs text-gray-400">
-            <FavoriteBorderIcon fontSize="small" />
-            {likeCount.toLocaleString()}
+      <div className="flex flex-col flex-1 p-5">
+        {/* ===== 위 (가변 영역) ===== */}
+        <div className="space-y-1">
+          <span className="block text-xs font-semibold text-pink-500 line-clamp-2 min-h-[2rem]">
+            {artist}
           </span>
 
-          {/* ⭐ 다른 링크 */}
-          <button
-            onClick={handleDetailClick}
-            className="rounded-full bg-pink-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-pink-600"
-          >
-            자세히 보기
-          </button>
+          <h3 className="text-sm font-bold text-gray-900 line-clamp-2 min-h-[2rem]">
+            {title}
+          </h3>
+        </div>
+
+        {/* ===== 아래 (고정 영역) ===== */}
+        <div className="mt-auto space-y-3">
+          {/* 날짜 / 장소 */}
+          <div className="space-y-1 text-xs text-gray-500">
+            <p className="flex items-center gap-1">
+              <CalendarMonthIcon fontSize="small" />
+              {formatDateRange(start_date, end_date)}
+            </p>
+            <p className="flex items-center gap-1 truncate">
+              <PlaceIcon fontSize="small" />
+              {venue}
+            </p>
+          </div>
+
+          {/* 좋아요 / 버튼 */}
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-1 text-xs text-gray-400">
+              <FavoriteBorderIcon fontSize="small" />
+              {favorite_count.toLocaleString()}
+            </span>
+
+            <button
+              onClick={handleDetailClick}
+              className="rounded-full bg-pink-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-pink-600"
+            >
+              자세히 보기
+            </button>
+          </div>
         </div>
       </div>
     </div>
