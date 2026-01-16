@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 import SearchIcon from '@mui/icons-material/Search'
@@ -9,6 +9,8 @@ import MenuItem from '@mui/material/MenuItem'
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone'
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import { useAuth } from '@/hooks/useAuth'
+import { NotificationService } from '@/services/NotificationService'
+import NotificationMenu from './NotificationMenu'
 
 const logoClass =
   'text-3xl font-bold leading-[1.25] bg-gradient-to-r from-[#F6339A] to-[#9810FA] bg-clip-text text-transparent'
@@ -31,8 +33,10 @@ const searchFieldSx = {
 export default function Header() {
   const navigate = useNavigate()
   const [keyword, setKeyword] = useState('')
+  const [notiAnchorEl, setNotiAnchorEl] = useState<HTMLElement | null>(null)
+  const [hasNotification, setHasNotification] = useState(false)
 
-  const { user, isLoggedIn ,logout } = useAuth()
+  const { user, isLoggedIn, logout } = useAuth()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
 
@@ -48,6 +52,15 @@ export default function Header() {
     if (!keyword.trim()) return
     navigate(`/search?q=${encodeURIComponent(keyword.trim())}`)
   }
+
+  useEffect(() => {
+    if (!isLoggedIn) return
+
+    NotificationService.checkNotification().then(res => {
+      setHasNotification(res.data.data.has_unread)
+    })
+  }, [isLoggedIn])
+
   return (
     <header className="bg-white">
       <div className="mx-auto max-w-layout px-6 h-20 flex items-center justify-between">
@@ -91,9 +104,28 @@ export default function Header() {
           <div className="flex items-center gap-6">
             {/* 🔔 알림 버튼 */}
             {isLoggedIn && (
-              <IconButton>
-                <NotificationsNoneIcon sx={{ fontSize: 28, color: 'black' }} />
-              </IconButton>
+              <>
+                <IconButton
+                  sx={{ position: 'relative' }}
+                  onClick={(e) => {
+                    setNotiAnchorEl(prev =>
+                      prev ? null : e.currentTarget
+                    )
+                  }}
+                >
+                  <NotificationsNoneIcon sx={{ fontSize: 28, color: 'black' }} />
+
+                  {hasNotification && (
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full" />
+                  )}
+                </IconButton>
+                <NotificationMenu
+                  anchorEl={notiAnchorEl}
+                  open={Boolean(notiAnchorEl)}
+                  onClose={() => setNotiAnchorEl(null)}
+                  onAllRead={() => setHasNotification(false)}
+                />
+              </>
             )}
 
             {/* 👤 사용자 버튼 */}
