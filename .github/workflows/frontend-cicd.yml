@@ -66,8 +66,8 @@ jobs:
                 'cd /home/ec2-user/stagelog-frontend',
                 'echo \"${{ secrets.DOCKERHUB_TOKEN }}\" | docker login -u \"${{ secrets.DOCKERHUB_USERNAME }}\" --password-stdin',
                 'sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/stagelog-repo:frontend'
-                'sudo docker stop stagelog-frontend || true'
-                'sudo docker rm stagelog-frontend || true'
+                'sudo docker stop stagelog-frontend'
+                'sudo docker rm stagelog-frontend'
                 'sudo docker run -d --name stagelog-frontend -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/stagelog-repo:frontend'
               ]"
                 
