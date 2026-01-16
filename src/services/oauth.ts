@@ -10,6 +10,12 @@ export function startOAuthLogin(provider: OAuthProvider) {
     redirect_uri: config.redirectUri,
   })
 
+  if (provider === 'naver') {
+    const state = crypto.randomUUID()
+    sessionStorage.setItem('naver_oauth_state', state)
+    params.append('state', state)
+  }
+
   if (config.scope) {
     params.append('scope', config.scope)
   }

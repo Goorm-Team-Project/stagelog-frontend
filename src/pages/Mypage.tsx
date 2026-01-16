@@ -1,40 +1,130 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import PinkSwitch from '@/components/PinkSwitch'
 import ConcertCard from '@/components/ConcertCard'
+import { AuthService } from '@/services/AuthService'
 // import { UserBadgeChip } from '@/components/UserBadgeChip'
 
 export default function MyPage() {
-  /* ===== mock ===== */
-  const user = {
-    nickname: '나의 닉네임',
-    level: 5,
-    exp: 75,
-    expText: '75 / 100 exp',
-    id: 'test_id15348',
-    email: 'test_id15348@test.com',
-  }
+  const [user, setUser] = useState({
+    nickname: '',
+    level: 0,
+    exp: 0,
+    expText: '',
+    id: '',
+    email: '',
+  })
+  const [favoriteConcerts, setFavoriteConcerts] = useState<Array<{
+    event_id: number
+    poster: string
+    title: string
+    artist: string
+    start_date: string
+    end_date?: string
+    venue: string
+    liked?: boolean
+    favorite_count?: number
+  }>>([])
 
   const [alarm, setAlarm] = useState({
-    email: true,
-    concert: true,
-    post: true,
+    is_email_sub: true,
+    is_events_notification_sub: true,
+    is_posts_notification_sub: true,
   })
 
-  const favoriteConcerts = Array.from({ length: 4 }).map((_, i) => ({
-    id: i,
-    imageUrl:
-      'https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg',
-    artist: 'BTS',
-    title: '2025 WORLD TOUR - SEOUL',
-    startDate: '2025-01-15',
-    endDate: '2025-01-17',
-    location: '고척스카이돔',
-    liked: true,
-    likeCount: 12453,
-  }))
-  
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   const [nickname, setNickname] = useState(user.nickname)
+
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const PAGE_SIZE = 9
+
+  const handleEditProfile = () => {
+    setIsEditingProfile(true)
+  }
+
+  const handleSaveProfile = () => {
+    setIsEditingProfile(false)
+
+    // Validate nickname
+    if (nickname.trim() === '') {
+      return
+    }
+
+    // Check if nickname is unchanged
+    if (user.nickname === nickname) {
+      return
+    }
+
+    // Save the updated nickname
+    AuthService.updateMyProfile({ nickname })
+      .then((res) => {
+        // API 응답 처리
+        setUser(res.data.data)
+        setNickname(res.data.data.nickname)
+      })
+      .catch((error) => {
+        console.error("Error updating profile:", error)
+      })
+  }
+
+  const handleSaveNotificationSettings = () => {
+    // Save the updated notification settings
+    AuthService.updateNotificationSettings(alarm)
+      .then((res) => {
+        // API 응답 처리
+        setAlarm({
+          is_email_sub: res.data.data.is_email_sub,
+          is_events_notification_sub: res.data.data.is_events_notification_sub,
+          is_posts_notification_sub: res.data.data.is_posts_notification_sub,
+        })
+      })
+      .catch((error) => {
+        console.error("Error updating notification settings:", error)
+      })
+  }
+
+  const fetchFavorites = (pageNumber: number) => {
+    AuthService.mypageFavorites({ page: pageNumber, size: PAGE_SIZE })
+      .then((res) => {
+        const events = res.data.data.events
+
+        setFavoriteConcerts((prev) =>
+          pageNumber === 1 ? events : [...prev, ...events]
+        )
+
+        if (events.length < PAGE_SIZE) {
+          setHasMore(false)
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching mypage favorites:", error)
+      })
+  }
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1
+    setPage(nextPage)
+    fetchFavorites(nextPage)
+  }
+
+  useEffect(() => {
+    AuthService.mypage()
+      .then((res) => {
+        // API 응답 처리
+        setUser(res.data.data)
+        setNickname(res.data.data.nickname)
+        setAlarm({
+          is_email_sub: res.data.data.is_email_sub,
+          is_events_notification_sub: res.data.data.is_events_notification_sub,
+          is_posts_notification_sub: res.data.data.is_posts_notification_sub,
+        })
+      })
+      .catch((error) => {
+        console.error("Error fetching mypage data:", error)
+      })
+
+    fetchFavorites(1)
+  }, [])
   return (
     <main className="mx-auto max-w-[1024px] px-4 py-8 space-y-10">
       {/* ================= 프로필 ================= */}
@@ -56,20 +146,20 @@ export default function MyPage() {
         <div className="flex items-center gap-4 rounded-xl border p-6 bg-white">
           {/* Lv */}
           <span className="text-md font-semibold text-gray-900 min-w-[48px]">
-            Lv.5
+            Lv.{user.level}
           </span>
 
           {/* Progress Bar */}
           <div className="flex-1 h-3 rounded-full bg-gray-200 overflow-hidden">
             <div
               className="h-full rounded-full bg-pink-500 transition-all"
-              style={{ width: `60%` }}
+              style={{ width: `${(user.exp / 120) * 100}%` }}
             />
           </div>
 
           {/* EXP */}
           <span className="text-md text-gray-600 min-w-[80px] text-right">
-            75 / 120 exp
+            {user.exp} / 120 exp
           </span>
         </div>
       </section>
@@ -84,7 +174,7 @@ export default function MyPage() {
             {/* ID */}
             <div className="flex justify-between items-center px-5 py-3 h-12">
               <span className="font-bold text-gray-900">ID</span>
-              <span>{user.id}</span>
+              <span>user-{user.id}</span>
             </div>
 
             {/* 닉네임 */}
@@ -116,7 +206,6 @@ export default function MyPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => {
-                  setNickname(user.nickname)
                   setIsEditingProfile(false)
                 }}
                 className="w-full rounded-full border px-4 py-2 text-sm"
@@ -125,10 +214,7 @@ export default function MyPage() {
               </button>
 
               <button
-                onClick={() => {
-                  console.log('닉네임 저장:', nickname)
-                  setIsEditingProfile(false)
-                }}
+                onClick={handleSaveProfile}
                 className="w-full rounded-full bg-pink-500 px-4 py-2 text-sm font-semibold text-white"
               >
                 저장
@@ -136,7 +222,7 @@ export default function MyPage() {
             </div>
           ) : (
             <button
-              onClick={() => setIsEditingProfile(true)}
+              onClick={handleEditProfile}
               className="w-full rounded-full bg-pink-500 px-4 py-2 text-sm font-semibold text-white"
             >
               회원정보 수정
@@ -152,9 +238,9 @@ export default function MyPage() {
             <div className="flex justify-between items-center px-5 py-3 h-12">
               <span className="font-bold text-gray-900">이메일 알림 받기</span>
               <PinkSwitch
-                checked={alarm.email}
+                checked={alarm.is_email_sub}
                 onChange={(e) =>
-                  setAlarm({ ...alarm, email: e.target.checked })
+                  setAlarm({ ...alarm, is_email_sub: e.target.checked })
                 }
               />
             </div>
@@ -162,9 +248,9 @@ export default function MyPage() {
             <div className="flex justify-between items-center px-5 py-3 h-12">
               <span className="font-bold text-gray-900">공연 정보 알림 받기</span>
               <PinkSwitch
-                checked={alarm.concert}
+                checked={alarm.is_events_notification_sub}
                 onChange={(e) =>
-                  setAlarm({ ...alarm, concert: e.target.checked })
+                  setAlarm({ ...alarm, is_events_notification_sub: e.target.checked })
                 }
               />
             </div>
@@ -172,15 +258,17 @@ export default function MyPage() {
             <div className="flex justify-between items-center px-5 py-3 h-12">
               <span className="font-bold text-gray-900">게시글 알림 받기</span>
               <PinkSwitch
-                checked={alarm.post}
+                checked={alarm.is_posts_notification_sub}
                 onChange={(e) =>
-                  setAlarm({ ...alarm, post: e.target.checked })
+                  setAlarm({ ...alarm, is_posts_notification_sub: e.target.checked })
                 }
               />
             </div>
           </div>
 
-          <button className="w-full rounded-full bg-[#FFCC00] px-4 py-2 text-sm font-semibold text-black">
+          <button
+            onClick={handleSaveNotificationSettings}
+            className="w-full rounded-full bg-[#FFCC00] px-4 py-2 text-sm font-semibold text-black">
             알림설정 저장
           </button>
         </div>
@@ -189,12 +277,27 @@ export default function MyPage() {
       {/* ================= 즐겨찾기 ================= */}
       <section className="space-y-4">
         <h2 className="font-bold">즐겨찾기</h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {favoriteConcerts.map((concert) => (
-            <ConcertCard key={concert.id} {...concert} />
-          ))}
-        </div>
+        {favoriteConcerts.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {favoriteConcerts.map((concert) => (
+              <ConcertCard key={concert.event_id} {...concert} />
+            ))}
+          </div>
+        ) : (
+          <div className='w-full text-gray-500 text-sm text-center'>
+            즐겨찾기한 공연이 없습니다.
+          </div>
+        )}
+        {favoriteConcerts.length > 0 && hasMore && (
+          <div className="flex justify-center">
+            <button
+              onClick={handleLoadMore}
+              className="rounded-full border px-6 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              더 보기
+            </button>
+          </div>
+        )}
       </section>
     </main>
   )

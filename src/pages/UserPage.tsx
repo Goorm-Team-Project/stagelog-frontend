@@ -1,13 +1,26 @@
+import { AuthService } from "@/services/AuthService"
+import { useEffect, useState } from "react"
+
 export default function MyPage() {
-  /* ===== mock ===== */
-  const user = {
-    nickname: '나의 닉네임',
-    level: 5,
-    exp: 75,
-    expText: '75 / 100 exp',
-    id: 'test_id15348',
-    email: 'test_id15348@test.com',
-  }
+  const [user, setUser] = useState({
+      nickname: '',
+      level: 0,
+      exp: 0,
+      expText: '',
+      id: '',
+      email: '',
+    })
+
+  useEffect(() => {
+      AuthService.mypage()
+        .then((res) => {
+          // API 응답 처리
+          setUser(res.data.data)
+        })
+        .catch((error) => {
+          console.error("Error fetching mypage data:", error)
+        })
+    }, [])
   return (
     <main className="mx-auto max-w-[1024px] px-4 py-8 space-y-10">
       {/* ================= 프로필 ================= */}
@@ -29,20 +42,20 @@ export default function MyPage() {
         <div className="flex items-center gap-4 rounded-xl border p-6 bg-white">
           {/* Lv */}
           <span className="text-md font-semibold text-gray-900 min-w-[48px]">
-            Lv.5
+            Lv.{user.level}
           </span>
 
           {/* Progress Bar */}
           <div className="flex-1 h-3 rounded-full bg-gray-200 overflow-hidden">
             <div
               className="h-full rounded-full bg-pink-500 transition-all"
-              style={{ width: `60%` }}
+              style={{ width: `${(user.exp / 120) * 100}%` }}
             />
           </div>
 
           {/* EXP */}
           <span className="text-md text-gray-600 min-w-[80px] text-right">
-            75 / 120 exp
+            {user.exp} / 120 exp
           </span>
         </div>
       </section>

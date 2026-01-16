@@ -19,7 +19,7 @@ export const OAUTH_PROVIDERS: Record<OAuthProvider, OAuthProviderConfig> = {
     authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
     clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
     redirectUri: `${FRONTEND_ORIGIN}/auth/google/callback`,
-    scope: 'profile email',
+    scope: 'https://www.googleapis.com/auth/userinfo.profile'
   },
   naver: {
     authUrl: 'https://nid.naver.com/oauth2.0/authorize',

@@ -1,11 +1,13 @@
 import { tokenManager } from "@/auth/tokenManager";
 import { AuthService } from "@/services/AuthService";
 import { createContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface User {
   id: string;
   nickname: string;
   level: number;
+  bookmarks: number[];
 }
 
 interface AuthContextType {
@@ -13,6 +15,8 @@ interface AuthContextType {
   isLoggedIn: boolean;
   login: (user: User) => void;
   logout: () => void;
+  addFavorite: (eventId: number) => void;
+  removeFavorite: (eventId: number) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,6 +38,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       tokenManager.clearAll()
       setUser(null)
     }
+  }
+
+  const addFavorite = (eventId: number) => {
+    if (!user) return
+
+    setUser({
+      ...user,
+      bookmarks: [...user.bookmarks, eventId]
+    })
+  }
+
+  const removeFavorite = (eventId: number) => {
+    if (!user) return
+
+    setUser({
+      ...user,
+      bookmarks: user.bookmarks.filter(id => id !== eventId)
+    })
   }
 
   useEffect(() => {
@@ -73,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn: !!user, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoggedIn: !!user, login, logout, addFavorite, removeFavorite }}>
       {children}
     </AuthContext.Provider>
   )
