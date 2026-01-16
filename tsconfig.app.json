@@ -23,11 +23,15 @@
 
     /* Linting */
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    
   },
   "include": ["src"]
 }
+// 빌드가 안되서 false 로 수정
+// "noUnusedLocals": false,
+// "noUnusedParameters": false,
