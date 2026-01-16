@@ -1,105 +1,44 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import ConcertCard from '@/components/ConcertCard'
 import PostCard from '@/components/PostCard'
 import SearchIcon from '@mui/icons-material/Search'
 import MovingIcon from '@mui/icons-material/Moving'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
+import { ConcertService } from '@/services/ConcertService'
+import { PostService } from '@/services/PostService'
 
 const MAX_PREVIEW = 4 // 미리보기 최대 개수
-const concerts = [
-    {
-        id: 1,
-        title: "2025 WORLD TOUR - SEOUL",
-        artist: 'BLACKPINK',
-        startDate: "2025-01-18",
-        endDate: "2025-01-19",
-        location: "고척돔",
-        imageUrl: "https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg",
-        likeCount: 523,
-    },
-    {
-        id: 2,
-        title: "BORN PINK ENCORE CONCERT",
-        artist: 'BLACKPINK',
-        startDate: "2024-12-25",
-        endDate: "2024-12-26",
-        location: "잠실종합운동장",
-        imageUrl: "https://timeline.coldplay.com/livetransmissions/27726_med_20160616184153.jpg",
-        likeCount: 412,
-    },
-]
 
-const posts = [
-    {
-        id: 1,
-        title: "블랙핑크 콘서트 좌석 질문",
-        excerpt: "고척돔 3층 시야 어떤가요?",
-        authorName: "사용자123",
-        createdAtLabel: "5분 전",
-        likeCount: 24,
-        commentCount: 13,
-        userBadgeName: "BLACKPINK",
-        categoryLabel: "질문",
-    },
-    {
-        id: 2,
-        title: "블랙핑크 굿즈 정보",
-        excerpt: "현장 구매 줄 많이 길까요?",
-        authorName: "사용자456",
-        createdAtLabel: "1시간 전",
-        likeCount: 18,
-        commentCount: 7,
-        userBadgeName: "BLACKPINK",
-        categoryLabel: "정보",
-    },
-    {
-        id: 1,
-        title: "블랙핑크 콘서트 좌석 질문",
-        excerpt: "고척돔 3층 시야 어떤가요?",
-        authorName: "사용자123",
-        createdAtLabel: "5분 전",
-        likeCount: 24,
-        commentCount: 13,
-        userBadgeName: "BLACKPINK",
-        categoryLabel: "질문",
-    },
-    {
-        id: 2,
-        title: "블랙핑크 굿즈 정보",
-        excerpt: "현장 구매 줄 많이 길까요?",
-        authorName: "사용자456",
-        createdAtLabel: "1시간 전",
-        likeCount: 18,
-        commentCount: 7,
-        userBadgeName: "BLACKPINK",
-        categoryLabel: "정보",
-    },
-    {
-        id: 1,
-        title: "블랙핑크 콘서트 좌석 질문",
-        excerpt: "고척돔 3층 시야 어떤가요?",
-        authorName: "사용자123",
-        createdAtLabel: "5분 전",
-        likeCount: 24,
-        commentCount: 13,
-        userBadgeName: "BLACKPINK",
-        categoryLabel: "질문",
-    },
-    {
-        id: 2,
-        title: "블랙핑크 굿즈 정보",
-        excerpt: "현장 구매 줄 많이 길까요?",
-        authorName: "사용자456",
-        createdAtLabel: "1시간 전",
-        likeCount: 18,
-        commentCount: 7,
-        userBadgeName: "BLACKPINK",
-        categoryLabel: "정보",
-    },
-]
 export default function SearchPage() {
+    const [concerts, setConcerts] = useState<Array<{
+        event_id: number
+        poster: string
+        title: string
+        artist: string
+        start_date: string
+        end_date?: string
+        venue: string
+        liked?: boolean
+        favorite_count?: number
+    }>>([])
+    const [posts, setPosts] = useState(Array<{
+    post_id: number;
+    event: {
+        event_id: number;
+        title: string;
+    }
+    user_id: number;
+    nickname: string;
+    created_at: string;
+    title: string;
+    content: string;
+    like: number;
+    dislike: number;
+    views: number;
+    category?: string;
+  }>())
     const [searchParams] = useSearchParams()
     const query = searchParams.get('q') ?? ''
     const [inputValue, setInputValue] = useState(query)
@@ -108,6 +47,35 @@ export default function SearchPage() {
     const handleSearch = () => {
         navigate(`/search?q=${inputValue}`)
     }
+
+    useEffect(() => {
+        ConcertService.getConcertList({
+                    search: query,
+                    sort: 'latest',
+                    page: 1,
+                })
+                .then((res) => {
+                    // TODO: 공연 목록 업데이트
+                    setConcerts(res.data.data.events)
+                })
+                .catch((error) => {
+                    console.error('Error fetching concert list:', error)
+                })
+
+        PostService.getPostList({
+              category: undefined,
+              search: query,
+              sort: 'latest',
+              page: 1,
+            })
+            .then((res) => {
+              const responseData = res.data.data
+              setPosts(responseData.posts)
+            })
+            .catch((error) => {
+              console.error('Error fetching posts:', error)
+            })
+    }, [query])
 
     return (
         <main className="mx-auto max-w-layout px-4 py-6 space-y-10">
@@ -144,26 +112,30 @@ export default function SearchPage() {
 
                 {/* 오른쪽 */}
                 <span className="text-gray-400">
-                    공연 <span className="text-black font-medium">2</span>
+                    공연 <span className="text-black font-medium">{concerts.length}</span>
                 </span>
                 <span className="text-gray-400">
-                    게시글 <span className="text-black font-medium">14</span>
+                    게시글 <span className="text-black font-medium">{posts.length}</span>
                 </span>
-                <span className="text-gray-400">
+                {/* <span className="text-gray-400">
                     뱃지 <span className="text-black font-medium">1</span>
-                </span>
+                </span> */}
             </p>
 
 
             {/* 공연 검색 결과 */}
             <section className="space-y-3">
+                {concerts.length === 0 && (
+                        <p className="text-gray-500 text-center">검색 결과가 없습니다.</p>
+                    )}
                 <div className="flex gap-8 overflow-x-auto pb-2">
                     {concerts.slice(0, MAX_PREVIEW).map((concert) => (
-                        <ConcertCard key={concert.id} {...concert} />
+                        <ConcertCard key={concert.event_id} {...concert} />
                     ))}
                 </div>
                 {concerts.length > MAX_PREVIEW && (
                     <button
+                    onClick={() => navigate(`/concerts?search=${query}`)}
                     className="
                         w-full flex items-center justify-center gap-1
                         border rounded-xl py-2 shadow-md
@@ -184,14 +156,18 @@ export default function SearchPage() {
                     커뮤니티 글
                 </h2>
 
+                {posts.length === 0 && (
+                    <p className="text-gray-500 text-center">검색 결과가 없습니다.</p>
+                )}
                 <div className="space-y-3">
                     {posts.slice(0, MAX_PREVIEW).map((post) => (
-                        <PostCard key={post.id} {...post} />
+                        <PostCard key={post.post_id} {...post} />
                     ))}
                 </div>
 
                 {posts.length > MAX_PREVIEW && (
                     <button
+                        onClick={() => navigate(`/community?q=${query}`)}
                         className="
                             w-full flex items-center justify-center gap-1
                             border rounded-xl py-2 shadow-md
@@ -205,7 +181,7 @@ export default function SearchPage() {
                 )}
             </section>
 
-            {/* 뱃지 */}
+            {/* 뱃지
             <section className="space-y-5">
                 <h2 className="text-xl font-bold flex items-center gap-2">
                     <LocalOfferIcon sx={{ fontSize: 20, color: '#F6339A' }} />
@@ -228,7 +204,7 @@ export default function SearchPage() {
                         </div>
                     ))}
                 </div>
-            </section>
+            </section> */}
         </main>
     )
 }
