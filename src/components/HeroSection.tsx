@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom"
+import heroBg from "@/assets/hero-background.jpg"
 
 interface HeroSectionProps {
     concertId?: number
@@ -19,7 +20,7 @@ export default function HeroSection({ concertId, imageUrl, artist, concertName, 
         <section className="relative h-[480px] w-full overflow-hidden">
             {/* Background Image */}
             <img
-                src={imageUrl || "./src/assets/hero-background.jpg"}
+                src={imageUrl || heroBg}
                 alt="Concert background"
                 className="absolute inset-0 h-full w-full object-cover"
             />
