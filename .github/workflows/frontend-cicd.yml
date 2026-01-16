@@ -2,7 +2,7 @@ name: Frontend Deploy to Private EC2
 
 on:
   push:
-    branches: [ "feature/cicd" ]
+    branches: [ "develop" ]
 
 jobs:
   build-and-push:
