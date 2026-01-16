@@ -13,7 +13,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,      // ← 원하는 포트
+    port: 80,      // ← 원하는 포트
     strictPort: true // ← 포트 사용 중이면 다른 포트로 안 튐
   },
 })
