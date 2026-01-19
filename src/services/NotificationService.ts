@@ -8,7 +8,7 @@ export const NotificationService = {
 
     // 알림 읽음 처리
     markAsRead: (notificationId: number) => {
-        return httpService.post(`/notifications/${notificationId}/read`)
+        return httpService.patch(`/notifications/${notificationId}/read`)
     },
 
     // 알림 여부 조회
