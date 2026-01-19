@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import Menu from '@mui/material/Menu'
 import { NotificationService } from '@/services/NotificationService'
+import { useNavigate } from 'react-router-dom'
 
 interface Notification {
   notification_id: number
+  post_id?: number
+  event_id?: number
   type: string
   message: string
   created_at: string
@@ -26,6 +29,7 @@ export default function NotificationMenu({
   onAllRead,
 }: Props) {
   const [notifications, setNotifications] = useState<Notification[]>([])
+  const navigate = useNavigate()
 
   /** 📅 날짜 포맷 (12.30(화)) */
   const formatDate = (dateString: string) => {
@@ -58,6 +62,12 @@ export default function NotificationMenu({
     if (notifications.every(n => n.notification_id === id || n.is_read)) {
       onAllRead()
     }
+  }
+
+  const handleClick = (notification_id: number, post_id?: number) => {
+    // TODO: Implement click handling logic
+    handleRead(notification_id)
+    navigate(`/posts/${post_id}`)
   }
 
   /** 📦 날짜별 그룹핑 */
@@ -102,7 +112,7 @@ export default function NotificationMenu({
             {list.map(notification => (
               <div
                 key={notification.notification_id}
-                onClick={() => handleRead(notification.notification_id)}
+                onClick={() => handleClick(notification.notification_id, notification.post_id)}
                 className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50"
               >
                 <span className="text-sm text-gray-900">
