@@ -66,8 +66,12 @@ export default function NotificationMenu({
 
   const handleClick = (notification_id: number, post_id?: number) => {
     // TODO: Implement click handling logic
-    handleRead(notification_id)
-    navigate(`/posts/${post_id}`)
+    if (!notifications.find(n => n.notification_id === notification_id)?.is_read) {
+      handleRead(notification_id)
+    }
+    if (post_id) {
+      navigate(`/posts/${post_id}`)
+    }
   }
 
   /** 📦 날짜별 그룹핑 */
