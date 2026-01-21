@@ -160,7 +160,7 @@ export default function MyPage() {
 
           {/* EXP */}
           <span className="text-md text-gray-600 min-w-[80px] text-right">
-            {user.exp} / 120 exp
+            {user.exp} / 100 exp
           </span>
         </div>
       </section>
