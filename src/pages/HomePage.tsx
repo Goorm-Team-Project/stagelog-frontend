@@ -16,6 +16,7 @@ export default function HomePage() {
     poster: string
     title: string
     artist: string
+    group_name: string | null
     start_date: string
     end_date?: string
     venue: string

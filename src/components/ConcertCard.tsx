@@ -13,6 +13,7 @@ interface ConcertCardProps {
   event_id: number
   poster: string
   artist: string
+  group_name: string | null
   title: string
   start_date: string   // "2025-01-15"
   end_date?: string    // "2025-01-17"
@@ -78,6 +79,7 @@ export default function ConcertCard({
   event_id,
   poster,
   artist,
+  group_name,
   title,
   start_date,
   end_date,
@@ -129,7 +131,7 @@ export default function ConcertCard({
         {/* ===== 위 (가변 영역) ===== */}
         <div className="space-y-1">
           <span className="block text-xs font-semibold text-pink-500 line-clamp-2 min-h-[2rem]">
-            {artist}
+            {group_name ? group_name : artist}
           </span>
 
           <h3 className="text-sm font-bold text-gray-900 line-clamp-2 min-h-[2rem]">
