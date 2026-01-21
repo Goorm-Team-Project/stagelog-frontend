@@ -15,7 +15,7 @@ interface AuthContextType {
   isLoggedIn: boolean;
   login: (user: User) => void;
   logout: () => void;
-  setNickname: (nickname: string) => void;
+  updateNickname: (nickname: string) => void;
   addFavorite: (eventId: number) => void;
   removeFavorite: (eventId: number) => void;
 }
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const setNickname = (nickname: string) => {
+  const updateNickname = (nickname: string) => {
     if (!user) return
 
     setUser({
@@ -105,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn: !!user, login, logout, setNickname, addFavorite, removeFavorite }}>
+    <AuthContext.Provider value={{ user, isLoggedIn: !!user, login, logout, updateNickname, addFavorite, removeFavorite }}>
       {children}
     </AuthContext.Provider>
   )
