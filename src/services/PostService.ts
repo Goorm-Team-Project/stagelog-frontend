@@ -32,8 +32,8 @@ export const PostService = {
     },
 
     // 게시글 작성
-    createPost({id, category, title, content, image}: {id: number, category: string, title: string, content: string, image?: string}) {
-        return httpService.post(`/events/${id}/posts`, { title, content, category, image });
+    createPost({id, category, title, content, image_url}: {id: number, category: string, title: string, content: string, image_url?: string | null}) {
+        return httpService.post(`/events/${id}/posts`, { title, content, category, image_url });
     },
 
     // 게시글 좋아요

@@ -44,7 +44,7 @@ export default function PostPage() {
         like: 0,
         dislike: 0,
         content: '',
-        imageUrl: ''
+        image_url: ''
     })
     const [myReaction, setMyReaction] = useState<ReactionType>(null)
     const [comments, setComments] = useState(Array<{
@@ -291,9 +291,9 @@ export default function PostPage() {
 
             {/* 본문 */}
             <section className="space-y-6">
-                {post.imageUrl && (
+                {post.image_url && (
                     <img
-                        src={post.imageUrl}
+                        src={post.image_url}
                         alt=""
                         className="w-full rounded-xl object-cover"
                     />
