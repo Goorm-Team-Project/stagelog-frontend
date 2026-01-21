@@ -156,6 +156,7 @@ export default function PostPage() {
                 // Handle successful comment submission
                 setComments((prev) => [res.data.data, ...prev]) // 최신 댓글 위로
                 setTotalComments((prev) => prev + 1)
+                setCommentContent('') // 입력창 초기화
             })
             .catch((err) => {
                 console.error('Error submitting comment:', err)
