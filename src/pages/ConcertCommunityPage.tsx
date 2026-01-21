@@ -136,7 +136,7 @@ export default function ConcertCommunityPage() {
       .catch((error) => {
         console.error('Error fetching posts:', error)
       })
-  }, [safePage])
+  }, [id, category, query, sort, safePage])
 
   return (
     <>
