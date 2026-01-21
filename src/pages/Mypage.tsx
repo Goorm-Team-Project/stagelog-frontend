@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import PinkSwitch from '@/components/PinkSwitch'
 import ConcertCard from '@/components/ConcertCard'
 import { AuthService } from '@/services/AuthService'
+import { useAuth } from '@/hooks/useAuth'
 // import { UserBadgeChip } from '@/components/UserBadgeChip'
 
 export default function MyPage() {
+  const { updateNickname } = useAuth();
   const [user, setUser] = useState({
     nickname: '',
     level: 0,
@@ -31,6 +33,9 @@ export default function MyPage() {
     is_events_notification_sub: true,
     is_posts_notification_sub: true,
   })
+
+  const [profileErrorMessage, setProfileErrorMessage] = useState('')
+  const [alarmErrorMessage, setAlarmErrorMessage] = useState('')
 
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   const [nickname, setNickname] = useState(user.nickname)
@@ -62,9 +67,17 @@ export default function MyPage() {
         // API 응답 처리
         setUser(res.data.data)
         setNickname(res.data.data.nickname)
+        updateNickname(res.data.data.nickname);
       })
       .catch((error) => {
-        console.error("Error updating profile:", error)
+        const message = error.response?.data?.message
+
+        if (message === "이미 존재하는 닉네임입니다.") {
+          setProfileErrorMessage("이미 존재하는 닉네임입니다.")
+        } else {
+          setProfileErrorMessage("프로필 정보를 불러오는 중 오류가 발생했습니다.")
+        }
+        setNickname(user.nickname) // Revert to previous nickname
       })
   }
 
@@ -79,8 +92,8 @@ export default function MyPage() {
           is_posts_notification_sub: res.data.data.is_posts_notification_sub,
         })
       })
-      .catch((error) => {
-        console.error("Error updating notification settings:", error)
+      .catch(() => {
+        setAlarmErrorMessage("알림 설정을 불러오는 중 오류가 발생했습니다.")
       })
   }
 
@@ -203,6 +216,12 @@ export default function MyPage() {
             </div>
           </div>
 
+          {profileErrorMessage && (
+            <div className="mt-2 text-sm text-red-500 text-center">
+              {profileErrorMessage}
+            </div>
+          )}
+
           {isEditingProfile ? (
             <div className="flex gap-2">
               <button
@@ -266,6 +285,12 @@ export default function MyPage() {
               />
             </div>
           </div>
+
+          {alarmErrorMessage && (
+            <div className="mt-2 text-sm text-red-500 text-center">
+              {alarmErrorMessage}
+            </div>
+          )}
 
           <button
             onClick={handleSaveNotificationSettings}
