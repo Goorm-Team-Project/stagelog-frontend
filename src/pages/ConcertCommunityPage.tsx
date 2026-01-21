@@ -59,7 +59,7 @@ export default function ConcertCommunityPage() {
 
   /** URL 쿼리 */
   const { id } = useParams<{ id: string }>()
-  const query = searchParams.get('q') ?? ''
+  const query = searchParams.get('search') ?? ''
   const category = searchParams.get('category') ?? '전체'
   const page = Number(searchParams.get('page') ?? 1)
 
@@ -89,7 +89,7 @@ export default function ConcertCommunityPage() {
 
   const handleSortChange = (value: SortType) => {
     setSearchParams({
-      q: query,
+      search: query,
       category,
       page: '1',
       sort: value,
@@ -193,7 +193,7 @@ export default function ConcertCommunityPage() {
               key={c}
               onClick={() =>
                 setSearchParams({
-                  q: query,
+                  search: query,
                   category: c,
                   page: '1',
                   sort,
@@ -220,7 +220,7 @@ export default function ConcertCommunityPage() {
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 setSearchParams({
-                  q: inputValue,
+                  search: inputValue,
                   page: '1',
                   category,
                 })
@@ -311,7 +311,7 @@ export default function ConcertCommunityPage() {
               page={safePage}
               onChange={(_, value) =>
                 setSearchParams({
-                  q: query,
+                  search: query,
                   category,
                   sort,
                   page: value.toString(),
