@@ -42,6 +42,7 @@ export default function RegisterPage() {
             const responseData = res.data.data;
             tokenManager.setAccess(responseData.access_token);
             tokenManager.setRefresh(responseData.refresh_token);
+            sessionStorage.removeItem('naver_oauth_state');
             login(responseData.user); // AuthContext에 사용자 정보 저장(백엔드 응답에 user 정보가 있다고 가정)
             // 리다이렉트 또는 상태 업데이트 등 추가 작업 수행
             navigate("/")
