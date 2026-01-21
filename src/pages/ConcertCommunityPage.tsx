@@ -239,12 +239,14 @@ export default function ConcertCommunityPage() {
               커뮤니티 글
             </h2>
 
-            <button
-              onClick={() => navigate('new')}
-              className='px-3 py-1 rounded-full border bg-pink-500 text-white border-pink-500 transition hover:bg-pink-600'
-            >
-              글쓰기
-            </button>
+            { isLoggedIn && (
+              <button
+                onClick={() => navigate('new')}
+                className='px-3 py-1 rounded-full border bg-pink-500 text-white border-pink-500 transition hover:bg-pink-600'
+              >
+                글쓰기
+              </button>
+            )}
           </div>
 
           {/* 정렬 버튼 */}
