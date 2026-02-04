@@ -3,6 +3,7 @@ name: Frontend Deploy to Private EC2
 on:
   push:
     branches: [ "develop" ]
+  workflow_dispatch:
 
 jobs:
   build-and-push:
@@ -72,5 +73,6 @@ jobs:
               ]"
                 
     
+
 
         
