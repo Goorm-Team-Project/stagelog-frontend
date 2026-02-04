@@ -67,7 +67,6 @@ jobs:
               fi
           
               # 2. SSM 연결 확인
-              aws ssm wait instance-online --instance-ids "$INSTANCE_ID"
               echo "SSM Online 상태 확인 중..."
               while true; do
                 STATUS=$(aws ssm describe-instance-information \
@@ -84,7 +83,7 @@ jobs:
                 sleep 10
               done
               
-              # 1. SSM 명령 전달 (파일 생성부터 실행까지 한 번에)
+              # 3. SSM 명령 전달 (파일 생성부터 실행까지 한 번에)
               # 'chown -R ec2-user:ec2-user /home/ec2-user/stagelog-frontend' ssm으로 만들어진 폴더의 권한 변경
               aws ssm send-command \
               --instance-ids $INSTANCE_ID \
@@ -105,5 +104,6 @@ jobs:
 
 
         
+
 
 
