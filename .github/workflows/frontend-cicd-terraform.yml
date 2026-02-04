@@ -1,0 +1,76 @@
+name: Frontend Deploy to Private EC2 cicd_terraform
+
+on:
+  push:
+    branches: [ "feature/cicd_terraform" ]
+
+jobs:
+  # build-and-push:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Login to Docker Hub
+  #       uses: docker/login-action@v3
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  #     - name: Get current time
+  #       uses: josStorer/get-current-time@v2
+  #       id: current-time
+  #       with:
+  #         format: YYYYMMDD-HHmm
+  #         utcOffset: "+09:00" # 한국 시간 기준
+
+  #     - name: Build and Push
+  #       uses: docker/build-push-action@v5
+  #       with:
+  #         build-args: |
+  #           VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
+  #           VITE_FRONTEND_ORIGIN=${{ secrets.VITE_FRONTEND_ORIGIN }}
+  #           VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+  #           VITE_KAKAO_CLIENT_ID=${{ secrets.VITE_KAKAO_CLIENT_ID }}
+  #           VITE_NAVER_CLIENT_ID=${{ secrets.VITE_NAVER_CLIENT_ID }}
+
+  #         context: .
+  #         push: true
+  #         tags: |
+  #           ${{ secrets.DOCKERHUB_USERNAME }}/stagelog-repo:frontend
+  #           ${{ secrets.DOCKERHUB_USERNAME }}/stagelog-repo:frontend-${{ steps.current-time.outputs.formattedTime }}
+
+  deploy:
+      #needs: build-and-push
+      runs-on: ubuntu-latest
+      steps:
+
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws-region: ${{ secrets.AWS_REGION }}
+        
+        - name: Deploy to Private EC2 via SSM
+          run: |
+            # 1. SSM 명령 전달 (파일 생성부터 실행까지 한 번에)
+            # 'chown -R ec2-user:ec2-user /home/ec2-user/stagelog-frontend' ssm으로 만들어진 폴더의 권한 변경
+            aws ssm send-command \
+              --targets "Key=tag:Name,Values=stagelog-ec2-frontend" \
+              --document-name "AWS-RunShellScript" \
+              --region ap-northeast-2 \
+              --parameters "commands=[
+                'mkdir -p /home/ec2-user/stagelog-frontend',
+                'chown -R ec2-user:ec2-user /home/ec2-user/stagelog-frontend',
+                'cd /home/ec2-user/stagelog-frontend',
+                'echo \"${{ secrets.DOCKERHUB_TOKEN }}\" | docker login -u \"${{ secrets.DOCKERHUB_USERNAME }}\" --password-stdin',
+                'sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/stagelog-repo:frontend',
+                'sudo docker stop stagelog-frontend',
+                'sudo docker rm stagelog-frontend',
+                'sudo docker run -d --name stagelog-frontend -p 80:80 ${{ secrets.DOCKERHUB_USERNAME }}/stagelog-repo:frontend'
+              ]"
+                
+    
+
+        
