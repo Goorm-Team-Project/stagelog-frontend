@@ -16,8 +16,6 @@ export const tokenManager = {
     accessToken = null
   },
 
-  getRefresh: () => Cookies.get('refresh_token'),
-
   /* register token */
   setRegister(token: string) {
     registerToken = token

@@ -37,9 +37,7 @@ export const AuthService = {
 
   // 로그인 상태 유지(refresh token으로 access token 재발급)
   refresh() {
-    return httpService.post('/auth/login/refresh', {
-      refresh_token: tokenManager.getRefresh(),
-    })
+    return httpService.post('/auth/login/refresh')
   },
 
   // 로그인 상태 유지(access token으로 사용자 정보 조회)
@@ -55,9 +53,7 @@ export const AuthService = {
 
   // 로그아웃
   logout() {
-    return httpService.post('/auth/logout', {
-      refresh_token: tokenManager.getRefresh(),
-    })
+    return httpService.post('/auth/logout')
   },
 
   // 마이페이지 정보 조회
