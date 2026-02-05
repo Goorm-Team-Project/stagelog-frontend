@@ -47,7 +47,6 @@ export default function OAuthCallbackPage() {
 
         if (responseData.access_token) {
           tokenManager.setAccess(responseData.access_token)
-          tokenManager.setRefresh(responseData.refresh_token)
           login(responseData.user)
           sessionStorage.removeItem('naver_oauth_state')
           navigate('/')
