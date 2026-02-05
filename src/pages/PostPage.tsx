@@ -300,16 +300,9 @@ export default function PostPage() {
                     />
                 )}
 
-                {/* 기존 코드는 주석 처리하거나 삭제 */}
-                {/* <p className="whitespace-pre-line text-gray-700 leading-7">
-        {post.content}
-    </p> */}
-
-                {/* ✅ XSS 공격을 허용하도록 수정한 코드 */}
-                <div
-                    className="whitespace-pre-line text-gray-700 leading-7"
-                    dangerouslySetInnerHTML={{ __html: post.content }}
-                />
+                <p className="whitespace-pre-line text-gray-700 leading-7">
+                    {post.content}
+                </p>
             </section>
 
             {/* 비로그인 시 */}
