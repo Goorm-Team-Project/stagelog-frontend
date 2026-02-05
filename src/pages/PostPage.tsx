@@ -92,13 +92,13 @@ export default function PostPage() {
     }
 
     function parseMyReaction(myReaction: {
-  like: boolean
-  dislike: boolean
-}): ReactionType {
-  if (myReaction.like) return 'like'
-  if (myReaction.dislike) return 'dislike'
-  return null
-}
+        like: boolean
+        dislike: boolean
+    }): ReactionType {
+        if (myReaction.like) return 'like'
+        if (myReaction.dislike) return 'dislike'
+        return null
+    }
 
     const handleReaction = async (type: 'like' | 'dislike') => {
         if (!isLoggedIn) return
@@ -253,9 +253,9 @@ export default function PostPage() {
                 {/* 메타 정보 */}
                 <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-gray-500">
                     <div className='flex items-center gap-1'>
-                        <button 
-                        onClick={() => navigate(`/users/${post.user_id}`)}
-                        className="font-medium text-xl text-gray-900">{post.nickname}</button>
+                        <button
+                            onClick={() => navigate(`/users/${post.user_id}`)}
+                            className="font-medium text-xl text-gray-900">{post.nickname}</button>
                     </div>
                     <div className='flex items-center gap-1'>
                         <div className='flex items-center gap-3'>
@@ -300,9 +300,16 @@ export default function PostPage() {
                     />
                 )}
 
-                <p className="whitespace-pre-line text-gray-700 leading-7">
-                    {post.content}
-                </p>
+                {/* 기존 코드는 주석 처리하거나 삭제 */}
+                {/* <p className="whitespace-pre-line text-gray-700 leading-7">
+        {post.content}
+    </p> */}
+
+                {/* ✅ XSS 공격을 허용하도록 수정한 코드 */}
+                <div
+                    className="whitespace-pre-line text-gray-700 leading-7"
+                    dangerouslySetInnerHTML={{ __html: post.content }}
+                />
             </section>
 
             {/* 비로그인 시 */}
@@ -396,9 +403,9 @@ export default function PostPage() {
                             >
                                 <div className="flex justify-between text-xs text-gray-500">
                                     <div className='flex items-center gap-1'>
-                                        <button 
-                                        onClick={() => navigate(`/users/${comment.user_id}`)}
-                                        className="font-medium text-gray-900">{comment.nickname}</button>
+                                        <button
+                                            onClick={() => navigate(`/users/${comment.user_id}`)}
+                                            className="font-medium text-gray-900">{comment.nickname}</button>
                                     </div>
                                     <span>{formatKoreanDate(comment.created_at)}</span>
                                 </div>
