@@ -48,13 +48,6 @@ httpService.interceptors.response.use(
     ) {
       original._retry = true
 
-      // refresh token 없으면 즉시 로그아웃
-      if (!tokenManager.getRefresh()) {
-        tokenManager.clearAll()
-        router.navigate('/login')
-        return Promise.reject(error)
-      }
-
       if (!isRefreshing) {
         isRefreshing = true
         try {
