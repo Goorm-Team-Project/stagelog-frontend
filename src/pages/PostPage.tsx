@@ -91,13 +91,11 @@ export default function PostPage() {
         }).replace(/\./g, '.').replace(/ /g, ' ').replace(',', '')
     }
 
-    function parseMyReaction(myReaction: {
-        like: boolean
-        dislike: boolean
-    }): ReactionType {
-        if (myReaction.like) return 'like'
-        if (myReaction.dislike) return 'dislike'
-        return null
+    function parseMyReaction(myReaction: { like: boolean; dislike: boolean } | null): ReactionType {
+        if (!myReaction) return null; // 데이터가 없으면 즉시 null 반환
+        if (myReaction.like) return 'like';
+        if (myReaction.dislike) return 'dislike';
+        return null;
     }
 
     const handleReaction = async (type: 'like' | 'dislike') => {
