@@ -39,13 +39,16 @@ export default function ConcertPage() {
     const query = searchParams.get('search') ?? ''
     const [inputValue, setInputValue] = useState(query)
     const page = Number(searchParams.get('page') ?? 1)
-    const [ totalCount, setTotalCount] = useState(0)
-    const [ totalPage, setTotalPage] = useState(0)
+    const [totalCount, setTotalCount] = useState(0)
+    const [totalPage, setTotalPage] = useState(0)
 
     /** 정렬 */
     const sort = (searchParams.get('sort') as SortType) ?? 'latest'
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
     const open = Boolean(anchorEl)
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [isError, setIsError] = useState(false);
 
     const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget)
@@ -65,6 +68,8 @@ export default function ConcertPage() {
     }
 
     useEffect(() => {
+        setIsLoading(true);
+        setIsError(false);
         window.scrollTo({ top: 0, behavior: 'smooth' })
 
         ConcertService.getConcertList({
@@ -73,15 +78,19 @@ export default function ConcertPage() {
             page,
             size: PAGE_SIZE,
         })
-        .then((res) => {
-            // TODO: 공연 목록 업데이트
-            setConcerts(res.data.data.events)
-            setTotalCount(res.data.data.total_count)
-            setTotalPage(res.data.data.total_pages)
-        })
-        .catch((error) => {
-            console.error('Error fetching concert list:', error)
-        })
+            .then((res) => {
+                // TODO: 공연 목록 업데이트
+                setConcerts(res.data.data.events)
+                setTotalCount(res.data.data.total_count)
+                setTotalPage(res.data.data.total_pages)
+            })
+            .catch((error) => {
+                console.error('Error fetching concert list:', error);
+                setIsError(true);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
     }, [page, query, sort])
 
     return (
@@ -161,11 +170,30 @@ export default function ConcertPage() {
                 </Menu>
 
                 {/* 카드 리스트 */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center mt-4">
-                    {concerts.map((concert) => (
-                        <ConcertCard key={concert.event_id} {...concert} />
-                    ))}
-                </div>
+                {isLoading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
+                        {/* Skeleton 컴포넌트가 있다면 여기에 12개 렌더링 */}
+                        {[...Array(8)].map((_, i) => (
+                            <div key={i} className="w-[250px] h-[350px] bg-gray-200 animate-pulse rounded-lg" />
+                        ))}
+                    </div>
+                ) : isError ? (
+                    <div className="py-20 text-center">
+                        <p className="text-red-500">정보를 불러오지 못했습니다.</p>
+                        <button onClick={() => window.location.reload()} className="mt-2 underline">다시 시도</button>
+                    </div>
+                ) : concerts.length === 0 ? (
+                    <div className="py-20 text-center text-gray-400">
+                        <p className="text-xl">검색 결과가 없습니다.</p>
+                        <p className="text-sm mt-2">다른 검색어로 시도해 보세요.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center mt-4">
+                        {concerts.map((concert) => (
+                            <ConcertCard key={concert.event_id} {...concert} />
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* 페이지네이션 */}

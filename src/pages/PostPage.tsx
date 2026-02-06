@@ -77,6 +77,9 @@ export default function PostPage() {
     const [reportReason, setReportReason] = useState('')
     const [reportDetail, setReportDetail] = useState('')
 
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSubmittingComment, setIsSubmittingComment] = useState(false); // 댓글 중복 제출 방지
+
     function formatKoreanDate(isoString: string) {
         const date = new Date(isoString)
 
@@ -99,91 +102,91 @@ export default function PostPage() {
     }
 
     const handleReaction = async (type: 'like' | 'dislike') => {
-        if (!isLoggedIn) return
+        if (!isLoggedIn) return;
 
-        try {
-            // API 호출
-            if (type === 'like') {
-                await PostService.likePost(post.post_id)
-            } else {
-                await PostService.dislikePost(post.post_id)
+        // 현재 상태 미리 저장 (에러 시 복구용)
+        const previousPost = { ...post };
+        const previousReaction = myReaction;
+
+        // 1. UI 먼저 업데이트 (Optimistic Update)
+        setPost((prev) => {
+            let like = prev.like
+            let dislike = prev.dislike
+
+            // 같은 반응 다시 누른 경우 → 취소
+            if (myReaction === type) {
+                if (type === 'like') like -= 1
+                else dislike -= 1
             }
 
-            // optimistic update
-            setPost((prev) => {
-                let like = prev.like
-                let dislike = prev.dislike
-
-                // 같은 반응 다시 누른 경우 → 취소
-                if (myReaction === type) {
-                    if (type === 'like') like -= 1
-                    else dislike -= 1
+            // 다른 반응에서 변경
+            else if (myReaction) {
+                if (type === 'like') {
+                    like += 1
+                    dislike -= 1
+                } else {
+                    dislike += 1
+                    like -= 1
                 }
+            }
 
-                // 다른 반응에서 변경
-                else if (myReaction) {
-                    if (type === 'like') {
-                        like += 1
-                        dislike -= 1
-                    } else {
-                        dislike += 1
-                        like -= 1
-                    }
-                }
+            // 처음 누른 경우
+            else {
+                if (type === 'like') like += 1
+                else dislike += 1
+            }
 
-                // 처음 누른 경우
-                else {
-                    if (type === 'like') like += 1
-                    else dislike += 1
-                }
+            return { ...prev, like, dislike }
+        });
+        setMyReaction(prev => (prev === type ? null : type));
 
-                return { ...prev, like, dislike }
-            })
-
-            // myReaction 갱신
-            setMyReaction((prev) => (prev === type ? null : type))
+        try {
+            if (type === 'like') await PostService.likePost(post.post_id);
+            else await PostService.dislikePost(post.post_id);
         } catch (e) {
-            console.error('reaction error', e)
+            // 2. 에러 발생 시 저장해둔 값으로 롤백
+            setPost(previousPost);
+            setMyReaction(previousReaction);
+            alert('반응 처리에 실패했습니다.');
         }
-    }
+    };
 
-    const handleSubmitComment = () => {
-        // TODO: Implement comment submission
-        CommentService.createComment(Number(id), commentContent)
-            .then((res) => {
-                // Handle successful comment submission
-                setComments((prev) => [res.data.data, ...prev]) // 최신 댓글 위로
-                setTotalComments((prev) => prev + 1)
-                setCommentContent('') // 입력창 초기화
-            })
-            .catch((err) => {
-                console.error('Error submitting comment:', err)
-            })
-    }
+    const handleSubmitComment = async () => {
+        if (!commentContent.trim() || isSubmittingComment) return;
+
+        setIsSubmittingComment(true); // 등록 시작
+        try {
+            const res = await CommentService.createComment(Number(id), commentContent);
+            setComments((prev) => [res.data.data, ...prev]);
+            setCommentContent('');
+        } finally {
+            setIsSubmittingComment(false); // 완료 후 해제
+        }
+    };
+
+
 
     useEffect(() => {
-        // TODO: Fetch post data from API
-        PostService.getPostDetail(Number(id))
-            .then((res) => {
-                const responseData = res.data.data
-                setPost(responseData)
-                setMyReaction(parseMyReaction(responseData.my_reaction))
-            })
-            .catch((err) => {
-                console.error('Error fetching post details:', err)
-            })
+        const loadData = async () => {
+            try {
+                const [postRes, commentRes] = await Promise.all([
+                    PostService.getPostDetail(Number(id)),
+                    CommentService.getComments(Number(id), { page: 1 })
+                ]);
+                setPost(postRes.data.data);
+                setMyReaction(parseMyReaction(postRes.data.data.my_reaction));
+                setComments(commentRes.data.data.comments);
+                setTotalComments(commentRes.data.data.total_count);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadData();
+    }, [id]);
 
-        CommentService.getComments(Number(id), { page: 1 })
-            .then((res) => {
-                const responseData = res.data.data
-                // Handle comments data
-                setComments(responseData.comments)
-                setTotalComments(responseData.total_count)
-            })
-            .catch((err) => {
-                console.error('Error fetching comments:', err)
-            })
-    }, [])
+    if (isLoading) return <div className="py-20 text-center">게시글을 불러오는 중...</div>;
 
     return (
         <main className="mx-auto max-w-layout px-4 py-6 space-y-6">
@@ -365,12 +368,13 @@ export default function PostPage() {
                             onChange={(e) => setCommentContent(e.target.value)}
                             placeholder="댓글을 입력하세요"
                             className="flex-1 rounded-lg border px-3 py-3 text-sm"
+                            onKeyDown={(e) => e.key === 'Enter' && handleSubmitComment()}
                         />
                         <button
-                            disabled={!isLoggedIn || !commentContent.trim()}
+                            disabled={!isLoggedIn || !commentContent.trim() || isSubmittingComment}
                             onClick={handleSubmitComment}
                             className="rounded-lg bg-pink-500 px-4 py-1 text-sm text-white hover:bg-pink-600">
-                            등록
+                            {isSubmittingComment ? '등록 중...' : '등록'}
                         </button>
                     </div>
                 )}

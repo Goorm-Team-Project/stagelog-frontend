@@ -50,37 +50,55 @@ export default function HomePage() {
     end_date?: string
   }>>([])
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+
   useEffect(() => {
-    // 페이지가 로드될 때 수행할 작업
-    ConcertService.getConcertList(
-      { page: 1, size: 8 }
-    ).then((response) => {
-      setConcerts(response.data.data.events);
-    });
+    const fetchAllData = async () => {
+      try {
+        setIsLoading(true);
+        setIsError(false);
 
-    PostService.getPostList(
-      {
-        category: '전체',
-        search: '',
-        sort: 'like',
-        page: 1,
-        size: 4
+        // 2. 모든 요청을 병렬로 처리 (하나라도 실패하면 catch로 가거나, 개별 처리 가능)
+        const [concertRes, postRes, upcomingRes] = await Promise.all([
+          ConcertService.getConcertList({ page: 1, size: 8 }),
+          PostService.getPostList({ category: '전체', sort: 'like', page: 1, size: 4 }),
+          ConcertService.getConcertList({ sort: 'favorite', page: 1, size: 5 })
+        ]);
+
+        setConcerts(concertRes.data.data.events || []);
+        setPosts(postRes.data.data.posts || []);
+        setUpcomingConcerts(upcomingRes.data.data.events || []);
+      } catch (error) {
+        console.error("데이터 로드 실패:", error);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
       }
-    )
-      .then((res) => {
-        const responseData = res.data.data
-        setPosts(responseData.posts)
-      })
-      .catch((error) => {
-        console.error('Error fetching posts:', error)
-      })
+    };
 
-      ConcertService.getConcertList(
-      { sort:'favorite', page: 1, size: 5 }
-    ).then((response) => {
-      setUpcomingConcerts(response.data.data.events);
-    });
-  }, [])
+    fetchAllData();
+  }, []);
+
+  // 3. 에러 발생 시 전체 에러 화면
+  if (isError) {
+    return (
+      <div className="py-40 text-center">
+        <p className="text-xl text-gray-600">데이터를 불러오는 데 실패했습니다.</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-6 py-2 bg-pink-500 text-white rounded-full"
+        >
+          다시 시도
+        </button>
+      </div>
+    );
+  }
+
+  // 4. 로딩 중일 때 (간단한 스피너 또는 메시지)
+  if (isLoading) {
+    return <div className="py-40 text-center text-gray-400">로딩 중...</div>;
+  }
 
   return (
     <main className="mx-auto max-w-layout flex flex-col gap-24">

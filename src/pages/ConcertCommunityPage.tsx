@@ -79,6 +79,9 @@ export default function ConcertCommunityPage() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
   }
@@ -97,28 +100,33 @@ export default function ConcertCommunityPage() {
     handleClose()
   }
 
-  const handleToggleFavorite = () => {
+  const handleToggleFavorite = async () => {
     if (!isLoggedIn) {
-      navigate('/login')
-      return
+      navigate('/login');
+      return;
     }
-    ConcertService.toggleFavoriteConcert(Number(id))
-    .then((res) => {
-      setIsFavorite(res.data.data.state === "on" ? true : false)
-      if (res.data.data.state === "on") {
-        addFavorite(Number(id))
-      } else {
-        removeFavorite(Number(id))
-      }
-    })
-    .catch((error) => {
-      console.error('Error toggling favorite:', error)
-    })
-  }
+
+    // 에러 발생 시 복구를 위해 이전 상태 저장
+    const previousFavorite = isFavorite;
+
+    try {
+      const res = await ConcertService.toggleFavoriteConcert(Number(id));
+      const newState = res.data.data.state === "on";
+      setIsFavorite(newState);
+
+      if (newState) addFavorite(Number(id));
+      else removeFavorite(Number(id));
+    } catch (error) {
+      alert("즐겨찾기 변경에 실패했습니다. 다시 시도해주세요.");
+      setIsFavorite(previousFavorite); // 상태 롤백
+    }
+  };
 
 
   /** 페이지 변경 시 스크롤 맨 위 */
   useEffect(() => {
+    setIsLoading(true);
+    setError(null);
     window.scrollTo({ top: 0, behavior: 'smooth' })
 
     PostService.getConcertPostList({
@@ -133,10 +141,24 @@ export default function ConcertCommunityPage() {
         setPosts(responseData.posts)
         setEvent(responseData.event)
       })
-      .catch((error) => {
-        console.error('Error fetching posts:', error)
+      .catch((err) => {
+        setError("데이터를 불러오는 중 오류가 발생했습니다.");
+        console.error(err);
       })
+      .finally(() => setIsLoading(false));
   }, [id, category, query, sort, safePage])
+
+  // API 응답 후 event가 없을 때의 처리
+  if (!isLoading && !event) {
+    return (
+      <div className="py-20 text-center">
+        <p className="text-xl font-bold">존재하지 않는 콘서트 정보입니다.</p>
+        <button onClick={() => navigate(-1)} className="mt-4 text-pink-500 underline">
+          뒤로 가기
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -162,27 +184,27 @@ export default function ConcertCommunityPage() {
                    flex items-center gap-1
                    rounded-full bg-white/90 px-4 py-2
                    text-gray-700 shadow hover:bg-white transition"
-            >
-              <HeartIcon
-                sx={{
-                  fill: isFavorite ? 'url(#heartGradient)' : '#9ca3af',
-                }}
-              />
+              >
+                <HeartIcon
+                  sx={{
+                    fill: isFavorite ? 'url(#heartGradient)' : '#9ca3af',
+                  }}
+                />
 
-              <svg width="0" height="0">
-                <defs>
-                  <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#F6339A" />
-                    <stop offset="100%" stopColor="#9810FA" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <span className="text-sm font-medium">
-                즐겨찾기
-              </span>
-            </button>
+                <svg width="0" height="0">
+                  <defs>
+                    <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#F6339A" />
+                      <stop offset="100%" stopColor="#9810FA" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <span className="text-sm font-medium">
+                  즐겨찾기
+                </span>
+              </button>
+            </div>
           </div>
-        </div>
         )}
       </div>
       <main className="mx-auto max-w-layout px-4 py-6 space-y-6">
@@ -239,7 +261,7 @@ export default function ConcertCommunityPage() {
               커뮤니티 글
             </h2>
 
-            { isLoggedIn && (
+            {isLoggedIn && (
               <button
                 onClick={() => navigate('new')}
                 className='px-3 py-1 rounded-full border bg-pink-500 text-white border-pink-500 transition hover:bg-pink-600'
@@ -289,17 +311,24 @@ export default function ConcertCommunityPage() {
             </MenuItem>
           </Menu>
 
-          {pagedPosts.length === 0 ? (
-            <div className="py-20 text-center text-gray-400">
-              검색 결과가 없습니다.
+          {isLoading ? (
+            <div className="flex justify-center py-20 font-medium text-gray-400">로딩 중...</div>
+          ) : error ? (
+            <div className="text-center py-20">
+              <p className="text-red-500">{error}</p>
+              <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-gray-200 rounded-md">다시 시도</button>
             </div>
           ) : (
-            pagedPosts.map((post) => (
-              <PostCard
-                key={post.post_id}
-                {...post}
-              />
-            ))
+            <>
+              {/* 검색 바 및 리스트 영역 */}
+              {pagedPosts.length === 0 ? (
+                <div className="py-20 text-center text-gray-400">
+                  {query ? `"${query}"에 대한 검색 결과가 없습니다.` : "작성된 게시글이 없습니다."}
+                </div>
+              ) : (
+                pagedPosts.map((post) => <PostCard key={post.post_id} {...post} />)
+              )}
+            </>
           )}
         </section>
 

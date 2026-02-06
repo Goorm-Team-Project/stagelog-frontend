@@ -30,20 +30,21 @@ export default function PostWritePage() {
 
       // ✅ 1. Presign → S3 PUT
       if (coverImage) {
-        const presignRes = await UploadService.presign(
-          coverImage.name,
-          coverImage.type
-        )
+        const presignRes = await UploadService.presign(coverImage.name, coverImage.type);
+        const { upload, file_url } = presignRes.data.data;
 
-        const { upload, file_url } = presignRes.data.data
-
-        await fetch(upload.url, {
-          method: upload.method, // PUT
+        const uploadRes = await fetch(upload.url, {
+          method: upload.method,
           headers: upload.headers,
           body: coverImage,
-        })
+        });
 
-        imageUrl = file_url
+        // ✅ 추가: S3 업로드 실패 시 중단
+        if (!uploadRes.ok) {
+          throw new Error('이미지 업로드에 실패했습니다.');
+        }
+
+        imageUrl = file_url;
       }
 
       // ✅ 2. 게시글 생성
@@ -96,6 +97,7 @@ export default function PostWritePage() {
 
         {/* 제목 */}
         <input
+          autoFocus
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="제목"
@@ -108,7 +110,7 @@ export default function PostWritePage() {
           onChange={(e) => setContent(e.target.value)}
           rows={8}
           placeholder="내용"
-          className="w-full rounded-lg border px-3 py-2 text-sm"
+          className="w-full rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-pink-500 outline-none"
         />
 
         <CoverImageUploader
