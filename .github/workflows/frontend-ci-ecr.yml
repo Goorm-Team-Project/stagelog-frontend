@@ -2,7 +2,7 @@ name: Frontend CI To ECR
 
 on:
   push:
-    branches: [ "develop" ] # main 브랜치에 푸시될 때 작동
+    branches: [ "feature/cicd_terraform" ] # main 브랜치에 푸시될 때 작동
 
 jobs:
   deploy:
