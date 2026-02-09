@@ -36,10 +36,21 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: stagelog/frontend 
         IMAGE_TAG: frontend-${{ github.sha }}-${{ steps.current-time.outputs.formattedTime }} 
+        VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+        VITE_FRONTEND_ORIGIN: ${{ secrets.VITE_FRONTEND_ORIGIN }}
+        VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+        VITE_KAKAO_CLIENT_ID: ${{ secrets.VITE_KAKAO_CLIENT_ID }}
+        VITE_NAVER_CLIENT_ID: ${{ secrets.VITE_NAVER_CLIENT_ID }}
       run: |
         # -f 옵션으로 Dockerfile의 위치를 지정하고, 
         # 마지막의 . 은 빌드 컨텍스트(소스 코드 루트)를 의미합니다.
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker build \
+        --build-arg VITE_API_BASE_URL=$VITE_API_BASE_URL \
+        --build-arg VITE_FRONTEND_ORIGIN=$VITE_FRONTEND_ORIGIN \
+        --build-arg VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID \
+        --build-arg VITE_KAKAO_CLIENT_ID=$VITE_KAKAO_CLIENT_ID \
+        --build-arg VITE_NAVER_CLIENT_ID=$VITE_NAVER_CLIENT_ID \
+        -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
         docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
@@ -71,6 +82,7 @@ jobs:
 
 
         
+
 
 
 
