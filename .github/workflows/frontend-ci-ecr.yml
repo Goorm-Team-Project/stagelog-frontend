@@ -47,7 +47,7 @@ jobs:
     
     - name: Refresh ASG Instances
       run: |
-        ASG_NAME="dev-stagelog-frontend-asg"
+        ASG_NAME="test-stagelog-frontend-asg"
         
         # 1. ASG가 실제로 존재하는지 확인
         ASG_EXISTS=$(aws autoscaling describe-auto-scaling-groups \
@@ -71,6 +71,7 @@ jobs:
 
 
         
+
 
 
 
