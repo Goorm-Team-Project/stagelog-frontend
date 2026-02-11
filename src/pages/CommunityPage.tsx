@@ -29,8 +29,8 @@ export default function CommunityPage() {
   const [posts, setPosts] = useState(Array<{
     post_id: number;
     event: {
-        event_id: number;
-        title: string;
+      event_id: number;
+      title: string;
     }
     user_id: number;
     nickname: string;
@@ -55,13 +55,14 @@ export default function CommunityPage() {
   const [pageCount, setPageCount] = useState(1)
 
   const safePage = Math.min(Math.max(page, 1), pageCount)
-  const startIndex = (safePage - 1) * PAGE_SIZE
-  const pagedPosts = posts.slice(startIndex, startIndex + PAGE_SIZE)
 
   /** 정렬 */
   const sort = (searchParams.get('sort') as SortType) ?? 'latest'
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
@@ -84,6 +85,8 @@ export default function CommunityPage() {
 
   /** 페이지 변경 시 스크롤 맨 위 */
   useEffect(() => {
+    setIsLoading(true);
+    setError(null);
     window.scrollTo({ top: 0, behavior: 'smooth' })
 
     PostService.getPostList({
@@ -93,15 +96,17 @@ export default function CommunityPage() {
       page: safePage,
       size: PAGE_SIZE
     })
-    .then((res) => {
-      const responseData = res.data.data
-      setPosts(responseData.posts)
-      setTotalCount(responseData.total_count)
-      setPageCount(responseData.total_pages)
-    })
-    .catch((error) => {
-      console.error('Error fetching posts:', error)
-    })
+      .then((res) => {
+        const responseData = res.data.data
+        setPosts(responseData.posts)
+        setTotalCount(responseData.total_count)
+        setPageCount(responseData.total_pages)
+      })
+      .catch((err) => {
+        setError("게시글을 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.");
+        console.error(err);
+      })
+      .finally(() => setIsLoading(false));
   }, [safePage, category, query, sort])
 
   return (
@@ -164,7 +169,7 @@ export default function CommunityPage() {
           <SortIcon fontSize="small" />
           정렬
           <span className="text-gray-400">· {SORT_LABEL[sort]}</span>
-          
+
         </button>
 
         <Menu
@@ -196,17 +201,19 @@ export default function CommunityPage() {
           </MenuItem>
         </Menu>
 
-        {posts.length === 0 ? (
-          <div className="py-20 text-center text-gray-400">
-            검색 결과가 없습니다.
+        {isLoading ? (
+          <div className="py-20 text-center">로딩 중...</div>
+        ) : error ? (
+          <div className="py-20 text-center text-red-500">
+            <p>{error}</p>
+            <button onClick={() => window.location.reload()} className="mt-2 underline">
+              새로고침
+            </button>
           </div>
+        ) : posts.length === 0 ? (
+          <div className="py-20 text-center text-gray-400">검색 결과가 없습니다.</div>
         ) : (
-          posts.map((post) => (
-            <PostCard
-              key={post.post_id}
-              {...post}
-            />
-          ))
+          posts.map((post) => <PostCard key={post.post_id} {...post} />)
         )}
       </section>
 

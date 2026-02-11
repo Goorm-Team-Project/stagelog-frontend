@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import MainLayout from '@/layout/MainLayout'
 import SubLayout from '@/layout/SubLayout'
 import AuthLayout from '@/layout/AuthLayout'
+import ErrorLayout from '@/layout/ErrorLayout'
 
 import HomePage from '@/pages/HomePage'
 import LoginPage from '@/pages/LoginPage'
@@ -16,6 +17,7 @@ import PostWritePage from '@/pages/PostWritePage'
 import Mypage from '@/pages/Mypage'
 import UserPage from '@/pages/UserPage'
 import OAuthCallbackPage from '@/pages/OAuthCallbackPage'
+import { BannedPage, RateLimitPage } from '@/pages/ErrorPages'
 
 export const router = createBrowserRouter([
   {
@@ -45,5 +47,12 @@ export const router = createBrowserRouter([
       { path: '/register', element: <RegisterPage /> },
       { path: '/auth/:provider/callback', element: <OAuthCallbackPage /> }
     ],
+  },
+  {
+    element: <ErrorLayout />,
+    children: [
+      { path: '/error/banned', element: <BannedPage /> },
+      { path: '/error/rate-limit', element: <RateLimitPage /> }
+    ] 
   }
 ])

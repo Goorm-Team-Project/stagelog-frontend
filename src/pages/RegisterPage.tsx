@@ -20,37 +20,38 @@ export default function RegisterPage() {
     const navigate = useNavigate()
     const { login } = useAuth()
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!nickname || !email) {
-            setErrorMessage("닉네임과 이메일을 모두 입력해주세요.")
-            return
-        }
+    const [isSubmitting, setIsSubmitting] = useState(false); // 로딩 상태 추가
 
-        AuthService.signup(
-            tokenManager.getRegister() || "",
-            nickname,
-            email,
-            notifications.is_email,
-            notifications.is_events,
-            notifications.is_posts
-        )
-        .then((res) => {
-            // 회원가입 성공 시 처리
-            tokenManager.clearRegister()
-            // 로그인 처리 (토큰 저장 등)
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!nickname || !email || isSubmitting) return; // ✅ 진행 중이면 차단
+
+        setIsSubmitting(true);
+        setErrorMessage("");
+
+        try {
+            const res = await AuthService.signup(
+                tokenManager.getRegister() || "",
+                nickname,
+                email,
+                notifications.is_email,
+                notifications.is_events,
+                notifications.is_posts
+            );
+
+            // 성공 로직 (토큰 저장 등 기존과 동일)
+            tokenManager.clearRegister();
             const responseData = res.data.data;
             tokenManager.setAccess(responseData.access_token);
-            sessionStorage.removeItem('naver_oauth_state');
-            login(responseData.user); // AuthContext에 사용자 정보 저장(백엔드 응답에 user 정보가 있다고 가정)
-            // 리다이렉트 또는 상태 업데이트 등 추가 작업 수행
-            navigate("/")
-        })
-        .catch((error) => {
-            // 에러 처리
-            console.error("회원가입 에러:", error)
-            setErrorMessage('회원가입에 실패했습니다. 다시 시도해주세요.')
-        })
+            login(responseData.user);
+            navigate("/");
+        } catch (error: any) {
+            // ✅ 에러 메시지 세분화 (예: 닉네임 중복 등)
+            const msg = error.response?.data?.message || '회원가입에 실패했습니다.';
+            setErrorMessage(msg);
+        } finally {
+            setIsSubmitting(false); // ✅ 로딩 해제
+        }
     }
 
     return (
@@ -158,14 +159,14 @@ export default function RegisterPage() {
 
                 {/* Submit */}
                 <button
-                    className="
-            w-full bg-pink-500 text-white
-            py-3 rounded-lg font-semibold
-            hover:bg-pink-600 transition
-          "
+                    disabled={isSubmitting || !nickname || !email}
                     onClick={handleSubmit}
+                    className={`w-full py-3 rounded-lg font-semibold transition ${isSubmitting || !nickname || !email
+                            ? 'bg-gray-300 cursor-not-allowed'
+                            : 'bg-pink-500 text-white hover:bg-pink-600'
+                        }`}
                 >
-                    회원정보 저장
+                    {isSubmitting ? '처리 중...' : '회원정보 저장'}
                 </button>
 
                 {/* Divider */}

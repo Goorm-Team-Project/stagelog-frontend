@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 
-export default function AuthLayout() {
+export default function ErrorLayout() {
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 py-6">
