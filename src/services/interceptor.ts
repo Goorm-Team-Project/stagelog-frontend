@@ -41,9 +41,27 @@ httpService.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config 
+    const status = error.response?.status
 
+    // 1. 403 Forbidden: 이미 IP 밴 된 상태
+    if (status === 403 || status === 429) {
+      // 대시보드나 홈으로 접근하지 못하도록 완전 차단 페이지로 리다이렉트
+      tokenManager.clearAll(); 
+      router.navigate('/error/banned'); 
+      return Promise.reject(error);
+    }
+
+    // 2. 429 Too Many Requests: 이번 요청으로 인해 IP 밴 됨
+    if (status === 429) {
+      // 대시보드나 홈으로 접근하지 못하도록 완전 차단 페이지로 리다이렉트
+      tokenManager.clearAll(); 
+      router.navigate('/error/rate-limit'); 
+      return Promise.reject(error);
+    }
+
+    // 3. 401 Unauthorized: 기존 토큰 갱신 로직
     if (
-      error.response?.status === 401 &&
+      status === 401 &&
       !original._retry
     ) {
       original._retry = true
