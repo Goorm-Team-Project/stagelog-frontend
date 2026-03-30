@@ -1,23 +1,6 @@
 import { ConcertService } from "@/services/ConcertService"
 import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom";
-
-// "event_id": 1,
-//         "kopis_id": "PF283191",
-//         "title": "미스터트롯3 TOP7 콘서트 [춘천]",
-//         "artist": "김용빈, 손용빈, 이정희, 김종범, 최재명, 남승민, 추혁진",
-//         "start_date": "2026-03-07",
-//         "end_date": "2026-03-07",
-//         "venue": "강원대학교 백령아트센터 (강원대학교 백령아트센터)",
-//         "area": null,
-//         "age": "만 7세 이상",
-//         "poster": "http://www.kopis.or.kr/upload/pfmPoster/PF_PF283191_260114_135845.gif",
-//         "time": "토요일(13:00,18:00)",
-//         "price": "SR석 154,000원, R석 143,000원, S석 121,000원",
-//         "relate_url": "http://ticket.interpark.com/Ticket/Goods/GoodsInfo.asp?GoodsCode=26000310",
-//         "host": "(주)밝은누리, TV조선",
-//         "genre": "대중음악",
-//         "update_date": "2026-01-14T15:00:04+00:00"
+import { useNavigate, useParams } from "react-router-dom";
 
 interface Concert {
   event_id: number;
@@ -41,34 +24,56 @@ interface Concert {
 export default function ConcertDetailPage() {
   // url 파라미터에서 id 가져오기
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [concert, setConcert] = useState<Concert | null>(null);
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
+
   const formatKoreanDate = (dateString?: string) => {
-  if (!dateString) return "";
+    if (!dateString) return "";
 
-  const date = new Date(dateString);
+    const date = new Date(dateString);
 
-  const datePart = date.toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+    const datePart = date.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
 
-  const weekday = date.toLocaleDateString("ko-KR", {
-    weekday: "short",
-  });
+    const weekday = date.toLocaleDateString("ko-KR", {
+      weekday: "short",
+    });
 
-  return `${datePart} (${weekday})`;
-};
+    return `${datePart} (${weekday})`;
+  };
 
   useEffect(() => {
-    if (!id) return
+    if (!id || isNaN(Number(id))) {
+      setError(true);
+      setIsLoading(false);
+      return;
+    }
 
-    ConcertService.getConcertDetail(Number(id)) // 예: event_id가 1인 콘서트 상세 정보 조회
+    setIsLoading(true);
+    ConcertService.getConcertDetail(Number(id))
       .then((res) => {
+        if (!res.data.data) throw new Error("No Data");
         setConcert(res.data.data);
       })
-  }, [])
+      .catch(() => {
+        setError(true);
+      })
+      .finally(() => setIsLoading(false));
+  }, [id]);
+
+  if (isLoading) return <div className="py-20 text-center">공연 정보를 불러오는 중입니다...</div>;
+  if (error || !concert) return (
+    <div className="py-20 text-center">
+      <p className="text-gray-500">해당 공연을 찾을 수 없거나 오류가 발생했습니다.</p>
+      <button onClick={() => navigate(-1)} className="mt-4 text-pink-500 underline">이전으로 돌아가기</button>
+    </div>
+  );
 
   return (
     <main className="mx-auto max-w-[1024px] px-6 py-10">
@@ -139,9 +144,9 @@ export default function ConcertDetailPage() {
 
           {/* 예매 링크 */}
           <div className="mt-10">
-            <button 
-            onClick={() => window.open(concert?.relate_url, "_blank")}
-            className="w-full rounded-full bg-pink-500 py-3 text-white font-semibold hover:bg-pink-600 transition">
+            <button
+              onClick={() => window.open(concert?.relate_url, "_blank")}
+              className="w-full rounded-full bg-pink-500 py-3 text-white font-semibold hover:bg-pink-600 transition">
               예매링크 바로가기
             </button>
           </div>

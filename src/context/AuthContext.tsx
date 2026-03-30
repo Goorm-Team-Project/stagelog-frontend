@@ -70,29 +70,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const restoreLogin = async () => {
-      const refreshToken = tokenManager.getRefresh()
-
-      // refresh token 없으면 로그인 시도 안 함
-      if (!refreshToken) {
-        setInitialized(true)
-        console.log("No refresh token found")
-        return
-      }
-
+      // 1️⃣ 쿠키가 있는지 확인하는 로직(!refreshToken)을 아예 지워버립니다.
       try {
-        // 1️⃣ access token 재발급
+        // 2️⃣ 바로 재발급 API를 호출합니다.
+        // withCredentials: true 덕분에 HttpOnly 쿠키가 자동으로 전송됩니다.
         const refreshRes = await AuthService.refresh()
-        tokenManager.setAccess(refreshRes.data.data.access_token)
 
-        // 2️⃣ 유저 정보 복구
-        const meRes = await AuthService.me()
-        setUser(meRes.data.data.user)
+        if (refreshRes.data.data.access_token) {
+          tokenManager.setAccess(refreshRes.data.data.access_token)
+
+          // 3️⃣ 유저 정보 복구
+          const meRes = await AuthService.me()
+          setUser(meRes.data.data.user)
+        }
       } catch (e) {
-        // refresh 실패 = 로그아웃 상태
+        // 4️⃣ 여기서 에러가 나면 진짜로 쿠키가 없거나 만료된 것입니다.
+        console.log("자동 로그인 실패 (쿠키 없음 또는 만료)")
         tokenManager.clearAll()
         setUser(null)
       } finally {
-        // 3️⃣ 앱 초기화 완료
+        // 5️⃣ 성공하든 실패하든 앱 초기화 완료
         setInitialized(true)
       }
     }

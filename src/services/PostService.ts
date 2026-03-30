@@ -16,7 +16,7 @@ export const PostService = {
 
     // 공연별 게시글 목록 조회
     getConcertPostList({id, category, search, sort, page}: {id: number, category?: string, search?: string, sort?: string, page?: number}) {
-        return httpService.get(`/events/${id}/posts`, {
+        return httpService.get(`/posts/${id}/inquiry`, {
             params: {
                 category,
                 search,
@@ -33,7 +33,7 @@ export const PostService = {
 
     // 게시글 작성
     createPost({id, category, title, content, image_url}: {id: number, category: string, title: string, content: string, image_url?: string | null}) {
-        return httpService.post(`/events/${id}/posts`, { title, content, category, image_url });
+        return httpService.post(`/posts/${id}/write`, { title, content, category, image_url });
     },
 
     // 게시글 좋아요

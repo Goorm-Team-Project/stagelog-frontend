@@ -1,5 +1,5 @@
 // auth/tokenManager.ts
-const REFRESH_KEY = 'refresh_token'
+import Cookies from 'js-cookie';
 
 let accessToken: string | null = null
 let registerToken: string | null = null
@@ -16,19 +16,6 @@ export const tokenManager = {
     accessToken = null
   },
 
-  /* refresh token */
-  setRefresh(token: string) {
-    localStorage.setItem(REFRESH_KEY, token)
-  },
-
-  getRefresh() {
-    return localStorage.getItem(REFRESH_KEY)
-  },
-
-  clearRefresh() {
-    localStorage.removeItem(REFRESH_KEY)
-  },
-
   /* register token */
   setRegister(token: string) {
     registerToken = token
@@ -42,7 +29,7 @@ export const tokenManager = {
 
   clearAll() {
     accessToken = null
-    localStorage.removeItem(REFRESH_KEY)
+    Cookies.remove('refresh_token', { path: '/' });
     registerToken = null
   },
 }
